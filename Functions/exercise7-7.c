@@ -4,10 +4,11 @@ float g_a, g_b, g_c;
 
 int main (void)
 {
+    void getCoefficients (void);
     void Solve_quadratic_equation (void);
     float squareroot (float number);
-    void getCoefficients (void);
 
+    getCoefficients ();
     Solve_quadratic_equation ();
 
     return 0;
@@ -40,9 +41,11 @@ void Solve_quadratic_equation (void)
         printf ("The roots are imaginary\n");
     }
 
-    x [0] = ( -g_b + squareroot( g_b * g_b - 4 * g_a * g_c ) ) / (2 * g_a);
-    x [1] = ( -g_b - squareroot( g_b * g_b - 4 * g_a * g_c ) ) / (2 * g_a);
+    else 
+    {   x [0] = ( -g_b + squareroot( g_b * g_b - 4 * g_a * g_c ) ) / (2 * g_a);
+        x [1] = ( -g_b - squareroot( g_b * g_b - 4 * g_a * g_c ) ) / (2 * g_a);
 
-    printf ("The roots of the equation are %f and %f\n", x [0], x [1]);
+        printf ("The roots of the equation are %f and %f\n", x [0], x [1]);
+    }    
 
 }
