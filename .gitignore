@@ -1,3 +1,11 @@
+# === Executables without extension ===
+# Ignore ALL files that have NO extension
+*
+#But not directories
+!*/
+#do not ignore  files with an extension
+!*.*
+    
 # compile binaries and objects
 *.o
 *.obj
@@ -8,9 +16,7 @@
 *.so
 *.dll
 
-# Executabales without extension 
-*
-\#
+# Do not ignore source code files 
 !*.c
 !*.h
 !*.md
