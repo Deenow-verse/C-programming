@@ -17,7 +17,7 @@ int main (void)
 
     if (gnumber_toconvert == 0)
    {
-        printf ("The program has been terminated");
+        printf ("The program has been terminated\n");
         break;
     }
 
@@ -34,16 +34,20 @@ int main (void)
 void getNumberandBase (void)
 {
     printf ("Enter the number you want to be converted (if you have converted all the numbers just press 0 to terminate)\n");
-    scanf ("%ld", &gnumber_toconvert);       
-
-    printf ("Enter the base you want to convert to (2 - 16)\n");
-    scanf ("%d", &gbase);
-
-    while (gbase < 2 || gbase > 16)
+    scanf ("%ld", &gnumber_toconvert);   
+    
+    if (gnumber_toconvert != 0)
     {
-        printf ("\n\nInvalid base entered, the base must be between 2 and 16\n");
-        printf ("\nPlease now enter a valid base\n");
+        printf ("Enter the base you want to convert to (2 - 16)\n");
         scanf ("%d", &gbase);
+    
+
+        while (gbase < 2 || gbase > 16)
+        {
+            printf ("\n\nInvalid base entered, the base must be between 2 and 16\n");
+            printf ("\nPlease now enter a valid base\n");
+            scanf ("%d", &gbase);
+        }
     }
 
 }    
