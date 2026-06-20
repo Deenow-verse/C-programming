@@ -13,7 +13,7 @@ int main (void)
     struct time currenttime, nexttime;
 
     printf ("Enter the time (hh mm ss)");
-    scanf ("%d  %d  %d", &currenttime.hour, &currenttime.minute, &currenttime.second);
+    scanf ("%d : %d : %d", &currenttime.hour, &currenttime.minute, &currenttime.second);
 
     nexttime = timeupdate (currenttime);
 
