@@ -12,10 +12,10 @@ int main (void)
     {{31, {'J', 'A', 'N'}}, {28, {'F','E','B'}}, {31, {'M', 'A', 'R'}}, {30, {'A', 'P', 'R'}}, {31, {'M', 'A', 'Y'}}, {30, {'J', 'U', 'N'}}, {31, {'J', 'U', 'L'}}, {31, {'A', 'U', 'G'}}, {30, {'S', 'E', 'P'}}, {31, {'O', 'C', 'T'}}, {30, {'N', 'O', 'V'}}, {31, {'D', 'E', 'C'}}};
 
     printf ("Month                                Number of Days\n");
-    printf ("------                              ----------------");
+    printf ("------                              ----------------\n");
 
     for (i = 0; i < 12; ++i )
     {
-        printf ("")
+        printf ("%c%c%c                                    %d\n", Months[i].name[0], Months[i].name[1], Months[i].name[2], Months[i].numberofdays);
     }
 }
