@@ -32,6 +32,7 @@ int main (void)
     scanf ("%14s", word);
 
     entry = lookup (dictionary, word, entries);
+    
     if ( entry != -1 )
     printf ("%s\n", dictionary[entry].definition);
 
@@ -67,5 +68,7 @@ int lookup (const struct entry dictionary [], const char search [], const int en
     for (i = 0; i < entries; ++i)
     if (equalString (search, dictionary [i].word))
     return i;
+
+    return  -1;
     
 }
