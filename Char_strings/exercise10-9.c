@@ -44,23 +44,31 @@ int main (void)
 
     dictionarySort (27, dictionary);
 
-    for (int i = 0; i <= 27; ++i)
+    for (int i = 0; i <= 26; ++i)
     {
         printf ("%s : %s\n", dictionary[i].word, dictionary[i].definition);
     }
+}
+
+char toLower (char c)
+{
+    if (c >= 'A' && c <= 'Z')
+    return c + 32;
+
+    return c;
 }
 
 int compareStrings (char s1[], char s2[])
 {
     int i = 0, answer;
 
-    while ( s1[i] == s2[i] && s1[i] != '\0'&& s2[i] != '\0')
+    while ( toLower (s1[i]) == toLower (s2[i]) && s1[i] != '\0'&& s2[i] != '\0')
     ++i;
 
-    if ( s1[i] < s2[i] )
+    if ( toLower (s1[i]) < toLower (s2[i]) )
     answer = -1;
 
-    else if ( s1[i] == s2[i] )
+    else if ( toLower (s1[i]) == toLower (s2[i]) )
     answer = 0;
 
     else
@@ -71,24 +79,21 @@ int compareStrings (char s1[], char s2[])
 
 void dictionarySort (int n, struct entry dictionary [])
 {
-    int i, j, a;
+    int i, j;
     struct entry temp;
     int compareStrings ( char s1[], char s2[]);
 
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < n - 1; ++i)
     {
-        for (j = i + 1; j <= n; ++j)
+        for (j = i + 1; j < n; ++j)
         {
-            for (a = 0; dictionary [i].word [a] < dictionary [j].word [a]; ++a)
+            if (compareStrings (dictionary[i].word , dictionary[j].word )  == 1)
             {
-                if (compareStrings (dictionary[i].word , dictionary[j].word )  == 1)
-                {
-                    temp = dictionary [i];
-                    dictionary [i] = dictionary [j];
-                    dictionary [j] = temp;
-                }
-
+                temp = dictionary [i];
+                dictionary [i] = dictionary [j];
+                dictionary [j] = temp;
             }
+
         }
     }
 }
