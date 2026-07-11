@@ -2,7 +2,7 @@
 
 int main (void)
 {
-   char text [] = "The wrong son";
+   char text [50] = "The wrong son";
    char add [] = "per";
    void insertString(char source [], char insert [], int position);
 
@@ -33,7 +33,7 @@ void insertString (char source [], char insert [], int position)
 
    while (sourceLen >= position)
    {
-        source [sourceLen] = source [(sourceLen + insertLen)];
+        source [(sourceLen + insertLen)] = source [sourceLen] ;
         --sourceLen; 
    }
 
