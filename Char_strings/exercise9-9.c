@@ -4,21 +4,34 @@
 int main (void)
 {
    bool stillFound = true;
+   bool replaceAtleastOnce = false;
    char text [50] = "The wrong son";
    char add [] = "per";
    char remove [] = "son";
    bool replaceString (char source [], char s1 [], char s2 []);
 
-   do
    stillFound = replaceString (text, remove, add);
-
-   while ( stillFound );
-
    if (stillFound == false)
-    printf ("The string you want to replace '%s' is not in '%s'\n", remove, text);
-   
+   printf ("The string you want to replace '%s' is not in '%s'\n", remove, text);
+
    else 
-   printf ("%s\n", text);
+  {
+    replaceAtleastOnce = true;
+
+    do
+    {
+        stillFound = replaceString (text, remove, add);
+        
+    }
+
+    while ( stillFound );
+   
+
+    printf ("%s\n", text);
+  }
+   
+   
+   
 
    return 0;
 
@@ -109,7 +122,7 @@ bool replaceString (char source [], char s1 [], char s2 [])
     void insertString (char source [], char insert [], int position);
 
     start = findString (source, s1);
-    numberOfChar = stringlen (s2);
+    numberOfChar = stringlen (s1);
     
     if (start == -1)
     return false;    
