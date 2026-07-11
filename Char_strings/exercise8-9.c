@@ -7,10 +7,10 @@ int main (void)
    char remove [] = "son";
    int replaceString (char source [], char s1 [], char s2 []);
 
-   replaceString (text, remove, add);
+   int result = replaceString (text, remove, add);
 
-   if (-1)
-    printf ("The string you want to replace '%s' is not in '%s'\n", remove, text);
+   if (result == -1)
+     printf ("The string you want to replace '%s' is not in '%s'\n", remove, text);
    
    else 
    printf ("%s\n", text);
@@ -106,7 +106,7 @@ int replaceString (char source [], char s1 [], char s2 [])
     start = findString (source, s1);
     numberOfChar = stringlen (s2);
     
-    if (start = -1)
+    if (start == -1)
     return -1;    
 
     else
@@ -115,5 +115,6 @@ int replaceString (char source [], char s1 [], char s2 [])
         insertString (source, s2, start);
     }
 
+    return 1;
 
 }
