@@ -16,22 +16,24 @@ int main(void)
 int strToInt (char string [])
 {
     int i = 0, intValue, result = 0;
+    _Bool isnegative = 0;
 
     if (string [0] == '-')
-        {
-            printf ("-");
-            
-            while (string [i - 1] != '\0')
-            {
-                string [i] = string [i + 1];
-                ++i;
-            }
-        }
+    {
+        isnegative = 1;
+        i = 1;
+    }   
 
-    for (i = 0;(string [i] >= '0' && string [i] <= '9'); i++)
+    while (string [i] >= '0' && string [i] <= '9')
     {        
         intValue = string [i] - '0';
         result = result * 10 + intValue;
+        ++i;
+    }
+
+    if (isnegative)
+    {
+        result = -result;
     }
 
     return result;
