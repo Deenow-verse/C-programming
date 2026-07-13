@@ -3,31 +3,36 @@
 int main (void) 
 {
     char str [20];
-    char IntToStr (int number, char string []);
+    void IntToStr (long long number, char string []);
     
-    IntToStr (-867, str);
+    IntToStr (-4294967295, str);
     printf ("%s\n", str);
 
     IntToStr (867, str);
     printf ("%s\n", str);
 
+    IntToStr (0, str);
+    printf ("%s\n", str);
+
     return 0;
 }
 
-char IntToStr (int number, char string [])
+void IntToStr (long long number, char string [])
 {
     int i = 0, divisor = 1;
+    long long numberCopy = number;
     
     if (number < 0)
     {
         string [0] = '-';
+        numberCopy *= -1;
         number *= -1;
         i = 1;
     }
 
-    while (number > 10)
+    while (numberCopy > 10)
     {
-        number /= 10;
+        numberCopy /= 10;
         divisor *= 10;
     }
 
