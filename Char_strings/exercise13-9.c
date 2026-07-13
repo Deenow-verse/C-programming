@@ -1,36 +1,39 @@
 #include <stdio.h>
 
+char string [81];
+
 int main (void) 
 {
-    char upper;
     char uppercase (void);
 
-    upper = uppercase ();
+    uppercase ();
 
-    printf ("The uppercase of the character is %c\n", upper);
+    printf ("The uppercase of the character is %s\n", string);
 
     return 0;
 
 }
 
-char getCharacter (void)
+char getString (void)
 {
-    char lower;
-    printf ("Enter the character you want to be converted to its uppercase:\n");
-    scanf ("%c", &lower);
-
-    return lower;
+    printf ("Enter the words you want its lowercase characters to be converted to  uppercase:\n");
+    scanf ("%80[^\n]s", string);
 } 
 
 char uppercase (void)
 {
-    char lower, upper;
-    char getCharacter (void);
+    int i = 0;
+    char getString (void);
 
-    lower = getCharacter ();
+    getString ();
 
-    upper = lower - ('a' + 'A');   
-
-    return upper;
+    while (string [i] != '\0')
+    {
+        if (string [i] >= 'a' && string [i] <= 'z' )
+        {
+            string [i] = string [i] - 'a' + 'A';
+        }
+        ++i;
+    }      
 
 }
