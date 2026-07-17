@@ -32,5 +32,8 @@ int main (void)
 
 void removeEntry (struct entry *removeAfter)
 {
+    if (removeAfter -> next == (struct entry *)0)
+    return;
+    
     removeAfter -> next = (removeAfter -> next) -> next;
 }
