@@ -11,7 +11,8 @@ int main (void)
 {
     void removeEntry (struct entry *removeAfter);
     void insertEntry (struct entry *insertAfter, struct entry *toInsert);
-    struct entry n1, n2, n3, n2_3, StartPointer, EndPointer, currentPointer;
+    struct entry n1, n2, n3, n2_3, StartPointer, EndPointer;
+    struct entry *currentPointer;
 
     StartPointer.next = &n1;
     StartPointer.previous = (struct entry *)0;
@@ -36,21 +37,19 @@ int main (void)
     printf ("The list after adding the new entry %d \n\n", n2_3.values);
     insertEntry (&StartPointer, &n2_3);
 
-    currentPointer.next = StartPointer.next ;
-    while (currentPointer.next->next != (struct entry *)0)
+    while (currentPointer != &EndPointer)
     {
-        printf ("The value of the current entry is %d \n", currentPointer.next -> values);
-        currentPointer.next = currentPointer.next -> next;
+        printf ("The value of the current entry is %d \n", currentPointer -> values);
+        currentPointer = currentPointer -> next;
     }
 
     printf ("\n\nRemoving the entry with value %d \n\n", n2.values);
-    removeEntry (&n3);
+    removeEntry (&n2);
 
-    currentPointer.next = StartPointer.next ;
-    while (currentPointer.next->next != (struct entry *)0)
+    while (currentPointer != &EndPointer)
     {
-        printf ("The value of the current entry is %d \n", currentPointer.next -> values);
-        currentPointer.next = currentPointer.next -> next;
+        printf ("The value of the current entry is %d \n", currentPointer -> values);
+        currentPointer = currentPointer -> next;
     }
 
     return 0;
@@ -59,6 +58,9 @@ int main (void)
 
 void removeEntry (struct entry *remove)
 {
+    if (remove == (struct entry *)0 )
+    return;
+
     remove -> previous -> next = remove -> next;
     remove -> next -> previous = remove -> previous;
    
@@ -66,6 +68,9 @@ void removeEntry (struct entry *remove)
 
 void insertEntry (struct entry *insertAfter, struct entry *toInsert)
 {
+    if (insertAfter == (struct entry *)0 || toInsert == (struct entry *)0)
+    return;
+
     toInsert -> next = insertAfter -> next;
     toInsert -> previous = insertAfter;
     insertAfter -> next -> previous = toInsert;
