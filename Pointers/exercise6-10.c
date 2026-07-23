@@ -9,14 +9,17 @@ struct entry
 
 int main (void)
 {
-    int removeEntry (struct entry *removeAfter);
+    void removeEntry (struct entry *removeAfter);
     void insertEntry (struct entry *insertAfter, struct entry *toInsert);
-    struct entry n1, n2, n3, n2_3, StartPointer, EndPointer;
+    struct entry n1, n2, n3, n2_3, StartPointer, EndPointer, currentPointer;
 
     StartPointer.next = &n1;
+    StartPointer.previous = (struct entry *)0;
+
     EndPointer.previous = &n3;
+    EndPointer.next = (struct entry *)0;
  
-    n1.previous = (struct entry *)0;
+    n1.previous = &StartPointer;
     n1.values = 100;
     n1.next = &n2;
 
@@ -26,38 +29,36 @@ int main (void)
 
     n3.previous = &n2;
     n3.values = 300;
-    n3.next = (struct entry *)0;
+    n3.next = &EndPointer;
 
-    insertEntry (&n2_3, &n2_3);
+    n2_3.values = 250;
 
-    while (StartPointer.next != (struct entry *)0)
+    printf ("The list after adding the new entry %d \n\n", n2_3.values);
+    insertEntry (&StartPointer, &n2_3);
+
+    currentPointer.next = StartPointer.next ;
+    while (currentPointer.next->next != (struct entry *)0)
     {
-        printf ("The value of the current entry is %d \n", StartPointer.next -> values);
-        StartPointer.next = StartPointer.next -> next;
+        printf ("The value of the current entry is %d \n", currentPointer.next -> values);
+        currentPointer.next = currentPointer.next -> next;
     }
 
-    int result = removeEntry (&n2);
+    printf ("\n\nRemoving the entry with value %d \n\n", n2.values);
+    removeEntry (&n3);
 
-    if (result == -1)
+    currentPointer.next = StartPointer.next ;
+    while (currentPointer.next->next != (struct entry *)0)
     {
-        printf ("The entry cannot be removed as it is the first or last entry or not in the list \n");
-    }
-
-    while (StartPointer.next != (struct entry *)0)
-    {
-        printf ("The value of the current entry is %d \n", StartPointer.next -> values);
-        StartPointer.next = StartPointer.next -> next;
+        printf ("The value of the current entry is %d \n", currentPointer.next -> values);
+        currentPointer.next = currentPointer.next -> next;
     }
 
     return 0;
    
 }
 
-int removeEntry (struct entry *remove)
+void removeEntry (struct entry *remove)
 {
-    if (remove -> next == (struct entry *)0 || remove -> previous == (struct entry *)0)
-    return -1; 
-    
     remove -> previous -> next = remove -> next;
     remove -> next -> previous = remove -> previous;
    
@@ -65,6 +66,8 @@ int removeEntry (struct entry *remove)
 
 void insertEntry (struct entry *insertAfter, struct entry *toInsert)
 {
-   insertAfter -> next = toInsert;
-   toInsert -> previous = insertAfter;
+    toInsert -> next = insertAfter -> next;
+    toInsert -> previous = insertAfter;
+    insertAfter -> next -> previous = toInsert;
+    insertAfter -> next = toInsert;
 }
