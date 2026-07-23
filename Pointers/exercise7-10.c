@@ -1,31 +1,12 @@
 #include <stdio.h>
 
-void sort (int *values, int *n)
-{
-    int *values2, temp;
-    int *const arrayEnd = values + *n;
-
-    for (values; values < arrayEnd - 1; ++values)
-    {
-        for (values2 = values + 1; values2 < arrayEnd ; ++values2)
-        {
-            if (values2  > values )
-            {
-                temp = *values;
-                *values = *values2;
-                *values2 = temp;
-            }
-        
-        }
-    }    
-}
+void sort (int *values, int *n);
 
 int main (void)
 {
     int i;
     int values [16] = { 34, -5, 6, 0, 12, 100, 56, 22, 44, -3, -9, 12, 17, 22, 6, 11};
     int n = 16;
-    void sort (int *values, int *n);
 
     printf ("The Array before undergoing the sorting process:\n");
     for (i = 0; i < n; ++i)
@@ -41,4 +22,24 @@ int main (void)
 
     return 0;
 
+}
+
+void sort (int *values, int *n)
+{
+    int *ptr1, *ptr2, temp;
+    int *const arrayEnd = values + *n;
+
+    for (ptr1 = values; ptr1 < arrayEnd - 1; ++ptr1)
+    {
+        for (ptr2 = ptr1 + 1; ptr2 < arrayEnd ; ++ptr2)
+        {
+            if (*ptr2  > *ptr1 )
+            {
+                temp = *ptr1;
+                *ptr1 = *ptr2;
+                *ptr2 = temp;
+            }
+        
+        }
+    }    
 }
