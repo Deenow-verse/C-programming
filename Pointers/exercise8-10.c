@@ -7,7 +7,7 @@ struct related
     struct related *next;
 };
 
-void sort3 (struct related *n1, struct related *n2, struct related *n3);
+void sort3 (int *n1, int *n2, int *n3);
 
 int main (void)
 {
@@ -15,7 +15,7 @@ int main (void)
     struct related *currentPointer;
 
     n1.previous = (struct related *)0;
-    n1.values = 100;
+    n1.values = 500;
     n1.next = &n2;
 
     n2.previous = &n1;
@@ -23,7 +23,7 @@ int main (void)
     n2.next = &n3;
 
     n3.previous = &n2;
-    n3.values = 300;
+    n3.values = 100;
     n3.next = (struct related *)0;
 
     printf ("The values before undergoing the sorting process:\n");
@@ -35,7 +35,7 @@ int main (void)
         currentPointer = currentPointer -> next;
     } 
 
-    sort3 (&n1, &n2, &n3);
+    sort3 (&n1.values, &n2.values, &n3.values);
 
     printf ("\n\nThe values after undergoing the sorting process:\n");
     
@@ -49,29 +49,29 @@ int main (void)
     return 0;
 }
 
-void sort3 (struct related *n1, struct related *n2, struct related *n3)
-{    
-    if (n1 -> values < n2 -> values)
-    {
-        n1 -> next = n2 -> next;
-        n2 -> next = n1;
-        n2 -> previous = n1 -> previous;
-        n1 -> previous = n2;
-    }
+void sort3 (int *n1, int *n2, int *n3)
+{   
+   int temp;
 
-    if (n1 -> values < n3 -> values)
-    {
-        n1 -> next = n3 -> next;
-        n3 -> next = n1;
-        n3 -> previous = n2 -> previous;
-        n1 -> previous = n3;
-    }
+   if (*n1 > *n2)
+   {
+    temp = *n1;
+    *n1 = *n2;
+    *n2 = temp;
+   }
 
-    if (n2 -> values < n3 -> values)
-    {
-       n2 -> next = n3 -> next;
-       n3 -> next = n2;
-       n3 -> previous = n2 -> previous;
-       n2 -> previous = n3;
-    }
+   if (*n1 > *n3)
+   {
+    temp = *n1;
+    *n1 = *n3;
+    *n3 = temp;
+   }
+
+   if (*n2 > *n3)
+   {
+    temp = *n2;
+    *n2 = *n3;
+    *n3 = temp;
+   }
+
 }
