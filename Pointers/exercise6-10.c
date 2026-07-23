@@ -7,10 +7,11 @@ struct entry
     struct entry *next;
 };
 
+void removeEntry (struct entry *removeAfter);
+void insertEntry (struct entry *insertAfter, struct entry *toInsert);
+
 int main (void)
 {
-    void removeEntry (struct entry *removeAfter);
-    void insertEntry (struct entry *insertAfter, struct entry *toInsert);
     struct entry n1, n2, n3, n2_3, StartPointer, EndPointer;
     struct entry *currentPointer;
 
@@ -37,6 +38,7 @@ int main (void)
     printf ("The list after adding the new entry %d \n\n", n2_3.values);
     insertEntry (&StartPointer, &n2_3);
 
+    currentPointer = StartPointer.next;
     while (currentPointer != &EndPointer)
     {
         printf ("The value of the current entry is %d \n", currentPointer -> values);
@@ -46,6 +48,7 @@ int main (void)
     printf ("\n\nRemoving the entry with value %d \n\n", n2.values);
     removeEntry (&n2);
 
+    currentPointer = StartPointer.next;
     while (currentPointer != &EndPointer)
     {
         printf ("The value of the current entry is %d \n", currentPointer -> values);
