@@ -25,6 +25,9 @@ void ClockUpdate (struct dateandTime *x);
 void get_date_and_time (struct dateandTime *as_now);
 void timeupdate (struct time *now);
 void updatedate (struct date *today);
+int numberofdays(struct date d);
+bool isLeapYear (struct date d);
+
 
 int main (void)
 {
@@ -41,13 +44,17 @@ int main (void)
 
 void get_date_and_time (struct dateandTime *as_now)
 {
-    printf("This program updates the time and date\n\n");
+    do 
+    {
+        printf("Enter the time hh mm ss\n");
+        scanf ("%d   %d   %d", &as_now->stime.hour, &as_now->stime.minute, &as_now->stime.second);
 
-    printf("Enter the date (dd mm yyyy)\n");
-    scanf ("%d   %d   %d", &as_now->sday.day, &as_now->sday.month, &as_now->sday.year);
-    
-    printf("Enter the time hh mm ss\n");
-    scanf ("%d   %d   %d", &as_now->stime.hour, &as_now->stime.minute, &as_now->stime.second);
+        if (as_now->stime.hour > 23 || as_now->stime.minute > 59 || as_now->stime.second > 59)
+        {
+            printf ("Invalid time. Please try again.\n\n");
+        }
+    } 
+    while (as_now->stime.hour > 23 || as_now->stime.minute > 59 || as_now->stime.second > 59);
 
 }
 
@@ -77,36 +84,25 @@ void timeupdate (struct time *now)
 
 void updatedate (struct date *today)
 {
-    int numberofdays(struct date d);   
-
     if (today->day != numberofdays (*today))
-    {
         today->day = today->day + 1;
-        today->month = today->month;
-        today->year = today->year;
-    }
 
     else if (today->month == 12)
-    {
-        today->day = 1;
-        today->month = 1;
-        today->year = today->year + 1;
-    }
+       {
+            today->day = 1;
+            today->month = 1;
+            today->year = today->year + 1;    
+        }    
 
-    else 
-    {
-        today->day = 1;
-        today->month = today->month + 1;
-        today->year = today->year;
-    }
-
-
+    else     
+        {   today->day = 1;
+            today->month = today->month + 1;
+        }
 }
 
 int numberofdays (struct date d)
 {
-    int days;
-    bool isLeapYear (struct date d);
+    int days;    
     const int daypermonth [12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     if (isLeapYear (d) == true && d.month == 2)
