@@ -7,7 +7,7 @@ struct entry
 };
 
 int lookup (const struct entry dictionary[], const char search[], const int entries);
-int compareStrings (const char s1[], const char s2[]);
+int compareStrings (const char *s1, const char *s2);
 
 
 int main (void)
@@ -58,7 +58,7 @@ int compareStrings (const char *s1, const char *s2)
 {
     int answer;
 
-    while ( *s1 == *s2 && *s1 != '\0'&& *s2 != '\0')
+    while ( *s1 == *s2 && *s1 != '\0')
     {
         ++s1;
         ++s2;
