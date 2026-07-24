@@ -44,10 +44,15 @@ int main (void)
 
 void get_date_and_time (struct dateandTime *as_now)
 {
+    printf("This program updates the time and date\n\n");
+
+    printf("Enter the date (dd mm yyyy)\n");
+    scanf ("%d %d %d", &as_now->sday.day, &as_now->sday.month, &as_now->sday.year);
+
     do 
     {
         printf("Enter the time hh mm ss\n");
-        scanf ("%d   %d   %d", &as_now->stime.hour, &as_now->stime.minute, &as_now->stime.second);
+        scanf ("%d %d %d", &as_now->stime.hour, &as_now->stime.minute, &as_now->stime.second);
 
         if (as_now->stime.hour > 23 || as_now->stime.minute > 59 || as_now->stime.second > 59)
         {
@@ -55,7 +60,6 @@ void get_date_and_time (struct dateandTime *as_now)
         }
     } 
     while (as_now->stime.hour > 23 || as_now->stime.minute > 59 || as_now->stime.second > 59);
-
 }
 
 void timeupdate (struct time *now)
