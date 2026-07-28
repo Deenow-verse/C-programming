@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-#define MAX(a, b)     ( ((a) > (b)) ? (a) : (b) )
-#define MAX3(a, b, c) ( MAX(a, MAX(b, c)) )
+#define MIN(a,b) (((a) < (b)) ? (a) : (b) )
 
 int main (void)
 {
