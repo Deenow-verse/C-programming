@@ -38,3 +38,6 @@ out/
 .DS_Store
 Thumbs.db
 
+# Temporary I/O testing files
+simp*.txt
+results*.txt
