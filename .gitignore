@@ -41,3 +41,4 @@ Thumbs.db
 # Temporary I/O testing files
 simp*.txt
 results*.txt
+results*.pdf
