@@ -69,7 +69,10 @@ void mergeFiles (FILE *file1, FILE *file2)
                 fprintf (stdout, "%c", char1);
            
             }
-        fprintf (stdout, "\n");
+            if (file1_alive)
+            {
+                fprintf(stdout, "\n");
+            }
         }
         
         if (file2_alive)
@@ -85,7 +88,10 @@ void mergeFiles (FILE *file1, FILE *file2)
                 fprintf (stdout, "%c", char2);           
             }
             
-            fprintf (stdout, "\n");
+            if (file1_alive)
+            {
+                fprintf(stdout, "\n");
+            }
         }
 
         if (file1_alive == 0 && file2_alive == 0)
