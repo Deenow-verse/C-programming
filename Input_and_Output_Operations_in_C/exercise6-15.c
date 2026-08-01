@@ -40,9 +40,9 @@ char getFeedback (void)
 {
     char C;
 
-    printf ("\n\nDo you want to continue?:\n");
-    printf ("if so the press the 'q' button else press any character key on your keyboard\n");
-    scanf ("%c", &C);
+    printf ("\n\nDo you want to stop?: ");
+    printf ("\nif so the press the 'q' button else press any character key on your keyboard: ");
+    scanf (" %c", &C);
     return C;
 }
 
@@ -53,14 +53,10 @@ void printFileSubset (FILE *extractFrom)
     char *buffer = NULL;
     size_t bufferLen = 0;
 
-   for (i = 1;  i <= n; ++i)
+   for (i = 1;  i <= n && !(feof (extractFrom)); ++i)
         {           
-            while (getline(&buffer, &bufferLen, extractFrom) != -1)
-            {         
-                if ((*(buffer) == '\n')) 
-                break;
-                
-                else
+            if (getline(&buffer, &bufferLen, extractFrom) != -1)
+            {
                 fprintf (stdout, "%s", buffer);
             }
 
@@ -79,5 +75,8 @@ void printFileSubset (FILE *extractFrom)
             
         }
 
+    fprintf (stdout, "\n");
+
+    free(buffer);    
     return;
 }
