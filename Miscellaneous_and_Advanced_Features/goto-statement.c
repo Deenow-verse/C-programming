@@ -3,6 +3,7 @@
 
 int main (void)
 {
+    int status = 1;
     int x_plane, y_plane, z_plane;
     int (*grid)[180][180] = malloc(sizeof( int[180][180][180]));
         
@@ -29,13 +30,23 @@ int main (void)
 
     }
 
+    status = 0;
+   
     printf ("The target is not found in the grid.\n");
+    printf ("Exiting the program.\n");    
+
+    search_Completed:
+    if (status == 1)
+    {
+        printf ("Jumped successfully hence Exiting the program.\n");
+    }
+
     free(grid);
-    return (EXIT_FAILURE);
-              
-    search_Completed: printf ("Found the co-ordinate of the target.\n");
-    printf ("Jumped successfully hence Exiting the program.\n");
-    free(grid);
+
+    if (status == 0)
+    {
+        return (EXIT_FAILURE);
+    }
 
     return (EXIT_SUCCESS);
 }
