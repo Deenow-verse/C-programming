@@ -5,12 +5,12 @@ int main (void)
 {
     int x_plane, y_plane, z_plane;
     int (*grid)[180][180] = malloc(sizeof( int[180][180][180]));
-    grid [89][89][89] = 99;
-    
+        
     if (grid == NULL) {
         perror("malloc");
         return (EXIT_FAILURE);
     }
+    grid [89][89][89] = 99;
 
     for (x_plane = 0; x_plane < 180; x_plane++)
     {
