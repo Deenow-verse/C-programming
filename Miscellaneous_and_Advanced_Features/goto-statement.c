@@ -18,19 +18,23 @@ int main (void)
         {
             for (z_plane = 0; z_plane < 180; z_plane++)
             {
-                if (grid[x_plane][y_plane][z_plane] == 99)
+                if (grid[x_plane][y_plane][z_plane] == 991)
                 {
                     printf ("The co-ordinate of the target is (%d, %d, %d).\n", x_plane, y_plane, z_plane);
                     goto search_Completed;
                 }
+                
             }
-        }
+        }   
+
     }
 
+    printf ("The target is not found in the grid.\n");
+    free(grid);
+    return (EXIT_FAILURE);
+              
     search_Completed: printf ("Found the co-ordinate of the target.\n");
-
-    printf ("JUmped successfully hence Exiting the program.\n");
-
+    printf ("Jumped successfully hence Exiting the program.\n");
     free(grid);
 
     return (EXIT_SUCCESS);
