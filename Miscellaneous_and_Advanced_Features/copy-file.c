@@ -3,7 +3,7 @@
 int main (int argc, char *argv[])
 {
     FILE *in, *out;
-    int c;
+    int c, counter;
 
     if (argc != 3)
     {
@@ -26,10 +26,12 @@ int main (int argc, char *argv[])
     while ( (c = getc (in)) != EOF )
     {
         putc (c, out);
+        ++counter;
     }
 
     fclose (in);
     fclose (out);
 
+    printf ("Copied %d characters from %s to %s.\n", counter, argv[1], argv[2]);
     return 0;
 }
