@@ -10,7 +10,7 @@ int main(void) {
         0x01,                   // Away Score: 1
         0x06,                   // Status: 0x02 (2nd Half) | 0x04 (VAR) = 0x06
         0x66, 0x66, 0x0E, 0x42, // Possession: 35.6f
-        0x50                    // Checksum (Valid)
+        0xFC                   // Checksum (Valid)
     };
 
     FILE *out = fopen("match_data.bin", "wb");
