@@ -3,7 +3,7 @@
 int main (int argc, char *argv[])
 {
     FILE *in, *out;
-    int c, counter;
+    int c, counter = 0;
 
     if (argc != 3)
     {
