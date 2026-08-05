@@ -39,7 +39,7 @@ typedef struct
 void printInt(PyObject *obj);
 void printFloat(PyObject *obj);
 void printChar (PyObject *obj);
-PyList *pylist ();
+PyList *PyList_New();
 void PyList_Append (PyList *list, PyObject *obj);
 void PyList_Insert(PyList *list, int index, PyObject *obj);
 void PyList_Pop(PyList *list, int index);
@@ -60,10 +60,12 @@ int main (void)
     printf("Testing print function directly: ");
     num1->print(num1);
 
+    PyList_Append(my_list, num1);
     Py_DECREF(num1); 
 
-    PyList_Append(my_list, num1);
-    
+    printf("Printing directly from the PyList array: ");
+    my_list->items[0]->print(my_list->items[0]);
+       
     free(my_list);
     return 0;
 } 
@@ -120,24 +122,4 @@ void PyList_Append (PyList *list, PyObject *obj)
     list->size = newsize;
         
     Py_INCREF(obj);
-}
-
-void PyList_Insert(PyList *list, int index, PyObject *obj)
-{
-    void *memmove(void *newlist, const void *list, size_t n);
-}
-
-void PyList_Pop(PyList *list, int index)
-{
-    Py_DECREF(*obj); 
-}
-
-void PyList_Free(PyList *list)
-{
-    while (list != NULL)
-    {
-        free(list);
-    }
-
-    free (PyList);
 }
