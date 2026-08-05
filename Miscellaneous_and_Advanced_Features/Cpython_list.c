@@ -164,10 +164,13 @@ void PyList_Insert(PyList *list, int index, PyObject *obj)
     Py_INCREF(obj);
 }
 
-/*void PyList_Pop(PyList *list, int index)
+void PyList_Pop(PyList *list, int index)
 {
-    Py_DECREF(*obj); 
-}*/
+    Py_DECREF(list->items[index]); 
+    memmove(&list->items[index], &list->items[index + 1], (list->size - index) * sizeof(PyObject *));
+
+    --list->size;
+}
 
 void PyList_Free(PyList *list)
 {
