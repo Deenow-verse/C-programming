@@ -42,40 +42,125 @@ TaskList* load_tasks(const char *filename);
 int main(void)
 {
     const char *db_file = ".underworld.dat";
-
-    // 1. Try to load the database. If it doesn't exist, create a new list.
+    
     TaskList *today_list = load_tasks(db_file);
-    if (today_list == NULL) {
-        printf("No previous tasks found. Starting fresh.\n");
-        today_list = create_list(10);
-    } else {
-        printf("Successfully loaded %zu tasks from disk.\n", today_list->size);
-    }
 
-    // 2. Display the tasks currently in RAM
-    printf("--- CURRENT TASKS ---\n");
-    for (size_t i = 0; i < today_list->size; i++) {
-        printf("[%c] %s (%d mins)\n", 
-            today_list->items[i]->completion_status ? 'X' : ' ', 
-            today_list->items[i]->name,
-            today_list->items[i]->target_duration);
-    }
-    printf("---------------------\n");
+    while (1)
+    {
+        printf ("UNDERWORLD TRACKER\n\n");
 
-    // 3. Add a new task to prove the engine works
-    Task *t = create_task("Conquer C Programming", 120, time(NULL), true);
-    append_task(today_list, t);
-    printf("Added new task: %s\n", t->name);
+        printf ("[1] View Today's Tasks\n");
+        printf ("[2] Add a New Task\n");
+        printf ("[3] Mark Task Complete\n");
+        printf ("[4] Exit and Save\n");
+        printf ("PLAN YOUR FUTURE\n");
 
-    // 4. Save the engine state back to the hard drive
-    if (save_tasks(today_list, db_file)) {
-        printf("Engine state saved successfully.\n");
-    } else {
-        printf("ERROR: Failed to save engine state!\n");
-    }
+        int option;
+        scanf ("%d", &option);
 
-    // 5. Clean up memory
-    free_list(today_list);
+        if (option == 1)
+        {
+            if (today_list == NULL)
+            {
+                printf("No previous tasks found. Starting fresh.\n");
+                today_list = create_list(10);
+            }
+
+           else
+           {
+                printf("Successfully loaded %zu tasks from disk.\n", today_list->size);
+           }
+
+            printf("--- CURRENT TASKS ---\n");
+            for (size_t i = 0; i < today_list->size; i++)
+            {
+                printf("[%zu] [%c] %s (%d mins)\n", i, today_list->items[i]->completion_status ? 'X' : ' ', today_list->items[i]->name, today_list->items[i]->target_duration);
+            }
+            printf("---------------------\n");
+        }
+
+        if (option == 2)
+        {
+            int i = 0;
+
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+
+            char temp_name[MAX];
+            char buffer[MAX];
+
+            printf("Enter the name of the task:\n");
+            fgets(temp_name, MAX, stdin);
+            
+            temp_name[strcspn(temp_name, "\n")] = 0;
+            
+            printf("Enter the target duration (mins):\n");
+            fgets(buffer, MAX, stdin);
+            int temp_duration = atoi(buffer);
+
+            printf("Is it permanent? (1 for Yes, 0 for No):\n");
+            fgets(buffer, MAX, stdin);
+            bool temp_perm = atoi(buffer) == 1;
+
+            Task *t = create_task(temp_name, temp_duration, get_day_start_time(), temp_perm);
+            append_task(today_list, t);
+
+            printf("Added new task: %s\n", t->name);
+
+            if (save_tasks(today_list, db_file))
+            {
+                printf("Engine state saved successfully.\n");
+            }
+            else
+            {
+                printf("ERROR: Failed to save engine state!\n");
+            }
+
+            ++i;
+        }
+
+        if (option == 3)
+        {
+            size_t number = 0;
+
+            if (today_list == NULL)
+            printf ("No saved task\n");
+
+            else
+            {
+                printf("--- CURRENT TASKS ---\n");
+                for (size_t i = 0; i < today_list->size; i++)
+                {
+                    printf("[%zu] [%c] %s (%d mins)\n", i, today_list->items[i]->completion_status ? 'X' : ' ', today_list->items[i]->name,today_list->items[i]->target_duration);
+                }
+                printf("---------------------\n");
+            }
+            
+            printf ("ENTER THE TASK NUMBER YOU HAVE FOR THE TASK YOU HAVE COMPLETED\n");
+            scanf ("%zu", &number);
+
+            if (number >= 0 && number < today_list->size)
+            {
+                today_list->items[number]->completion_status = true; 
+                printf("Task %zu marked complete!\n", number);
+            }
+            else
+            {
+                printf("Invalid task number.\n");
+            } 
+
+        }
+
+        if (option == 4)
+        {
+            save_tasks (today_list, db_file);
+            free_list(today_list);
+            break;
+        }
+
+    }    
+
+    
 
     return 0;
 }
