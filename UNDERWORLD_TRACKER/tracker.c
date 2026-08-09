@@ -37,11 +37,13 @@ void free_list(TaskList* list);
 bool append_task(TaskList *list, Task *new_task);
 time_t get_day_start_time(void);
 bool save_tasks(TaskList *list, const char *filename);
+TaskList* load_tasks(const char *filename);
 
 TaskList* create_list(size_t initial_capacity)
 {
     TaskList *today = malloc (sizeof (TaskList));
-    if (today == NULL) return NULL;
+    if (today == NULL)
+    return NULL;
 
     today -> size = 0;
     today -> allocated = initial_capacity;
@@ -73,6 +75,9 @@ Task* create_task(const char* name, int duration, time_t scheduled, bool permane
 
 void free_list(TaskList* list)
 {
+    if (list == NULL)
+    return;
+
     for (int i = 0; i < list -> size; ++i)
     {
         free (list -> items [i]);
@@ -86,12 +91,12 @@ void free_list(TaskList* list)
 
 bool append_task(TaskList *list, Task *new_task)
 {
-    size_t newsize, new_allocated;
+    size_t newsize;
     newsize = list -> size + 1;
 
     if (list -> size == list -> allocated)
     {
-        new_allocated = (newsize >> 3) + (newsize < 9 ? 3 : 6) + + newsize;
+        size_t new_allocated = (newsize >> 3) + (newsize < 9 ? 3 : 6) + + newsize;
         Task **temp = realloc (list -> items, new_allocated * sizeof (Task *));
 
         if (temp == NULL)
@@ -107,6 +112,8 @@ bool append_task(TaskList *list, Task *new_task)
 
     list -> items [list -> size] = new_task;
     list -> size = newsize; 
+
+    return true;
 
 }
 
@@ -135,7 +142,6 @@ bool save_tasks(TaskList *list, const char *filename)
     FILE *file = fopen(filename, "wb");
     if (file == NULL)
     {
-        fprintf(stderr, "Error: Could not open file %s for writing.\n", filename);
         return false;
     }
 
@@ -156,5 +162,48 @@ bool save_tasks(TaskList *list, const char *filename)
 
     fclose(file);
     return true;
+
+}
+
+TaskList* load_tasks(const char *filename)
+{
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL)
+    {
+        return NULL;
+    }
+    
+    size_t task_count = 0;
+    if (fread(&task_count, sizeof(size_t), 1, file) != 1)
+    {
+        fclose(file);
+        return NULL;
+    }
+
+    TaskList *list = create_list(task_count);
+    if (list == NULL)
+    {
+        fclose(file);
+        return NULL;
+    }
+
+    for (size_t i = 0; i < task_count; i++)
+    {
+        Task *temp_task = malloc(sizeof(Task));
+
+        if (temp_task == NULL)
+        break;
+
+        if (fread(temp_task, sizeof(Task), 1, file) != 1)
+        {
+            free(temp_task);
+            break; 
+        }
+
+        append_task(list, temp_task);
+    }
+
+    fclose(file);
+    return list;    
 
 }
