@@ -1,3 +1,4 @@
+#include <stdio.h> 
 #include <stdbool.h>
 #include <time.h>
 #include <stddef.h>
@@ -33,6 +34,7 @@ typedef struct
 TaskList* create_list(size_t initial_capacity);
 Task* create_task(const char* name, int duration, time_t scheduled, bool permanent);
 void free_list(TaskList* list);
+bool append_task(TaskList *list, Task *new_task);
 
 TaskList* create_list(size_t initial_capacity)
 {
@@ -41,7 +43,7 @@ TaskList* create_list(size_t initial_capacity)
 
     today -> size = 0;
     today -> allocated = initial_capacity;
-    today -> items = maloc (initial_capacity * sizeof (Task*));
+    today -> items = malloc (initial_capacity * sizeof (Task*));
 
     if (today->items == NULL)
     {
@@ -60,8 +62,8 @@ Task* create_task(const char* name, int duration, time_t scheduled, bool permane
     newtask->name[MAX - 1] = '\0';
 
     newtask -> completion_status = false;
-    newtask -> target_duration = 0;
-    newtask -> scheduled_time = 0;
+    newtask -> target_duration = duration;
+    newtask -> scheduled_time = scheduled;
     newtask->is_permanent = permanent;
 
     return newtask;
@@ -78,4 +80,30 @@ void free_list(TaskList* list)
     free (list -> items);
 
     free (list);
+}
+
+bool append_task(TaskList *list, Task *new_task)
+{
+    size_t newsize, new_allocated;
+    newsize = list -> size + 1;
+
+    if (list -> size == list -> allocated)
+    {
+        new_allocated = (newsize >> 3) + (newsize < 9 ? 3 : 6) + + newsize;
+        Task **temp = realloc (list -> items, new_allocated * sizeof (Task *));
+
+        if (temp == NULL)
+        {
+            fprintf(stderr , "Memory reallocation failed\n");
+            exit(1);
+        }
+
+        list -> items = temp;
+        list -> allocated = new_allocated;
+
+    }
+
+    list -> items [list -> size] = new_task;
+    list -> size = newsize; 
+
 }
