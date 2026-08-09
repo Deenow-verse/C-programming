@@ -35,6 +35,7 @@ TaskList* create_list(size_t initial_capacity);
 Task* create_task(const char* name, int duration, time_t scheduled, bool permanent);
 void free_list(TaskList* list);
 bool append_task(TaskList *list, Task *new_task);
+time_t get_day_start_time(void);
 
 TaskList* create_list(size_t initial_capacity)
 {
@@ -106,4 +107,21 @@ bool append_task(TaskList *list, Task *new_task)
     list -> items [list -> size] = new_task;
     list -> size = newsize; 
 
+}
+
+time_t get_day_start_time(void)
+{
+    time_t raw_now = time(NULL);
+    struct tm *time_info = localtime(&raw_now);
+
+    if (time_info->tm_hour < 16)
+    {
+        time_info->tm_mday -= 1; 
+    }
+
+    time_info->tm_hour = 16;
+    time_info->tm_min = 0;
+    time_info->tm_sec = 0;
+
+    return mktime(time_info);
 }
