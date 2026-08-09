@@ -38,18 +38,19 @@ bool append_task(TaskList *list, Task *new_task);
 time_t get_day_start_time(void);
 bool save_tasks(TaskList *list, const char *filename);
 TaskList* load_tasks(const char *filename);
+void render_dashboard(TaskList *list);
 
 int main(void)
 {
     const char *db_file = ".underworld.dat";
     
     TaskList *today_list = load_tasks(db_file);
-
+    
     while (1)
     {
-        printf ("UNDERWORLD TRACKER\n\n");
+        render_dashboard(today_list);
 
-        printf ("[1] View Today's Tasks\n");
+        printf ("[1] Refresh Dashboard\n");
         printf ("[2] Add a New Task\n");
         printf ("[3] Mark Task Complete\n");
         printf ("[4] Exit and Save\n");
@@ -58,7 +59,7 @@ int main(void)
         int option;
         scanf ("%d", &option);
 
-        if (option == 1)
+      /* if (option == 1)
         {
             if (today_list == NULL)
             {
@@ -77,7 +78,7 @@ int main(void)
                 printf("[%zu] [%c] %s (%d mins)\n", i, today_list->items[i]->completion_status ? 'X' : ' ', today_list->items[i]->name, today_list->items[i]->target_duration);
             }
             printf("---------------------\n");
-        }
+        }*/
 
         if (option == 2)
         {
@@ -126,7 +127,7 @@ int main(void)
             if (today_list == NULL)
             printf ("No saved task\n");
 
-            else
+           /*else
             {
                 printf("--- CURRENT TASKS ---\n");
                 for (size_t i = 0; i < today_list->size; i++)
@@ -134,7 +135,7 @@ int main(void)
                     printf("[%zu] [%c] %s (%d mins)\n", i, today_list->items[i]->completion_status ? 'X' : ' ', today_list->items[i]->name,today_list->items[i]->target_duration);
                 }
                 printf("---------------------\n");
-            }
+            }*/
             
             printf ("ENTER THE TASK NUMBER YOU HAVE FOR THE TASK YOU HAVE COMPLETED\n");
             scanf ("%zu", &number);
@@ -332,4 +333,31 @@ TaskList* load_tasks(const char *filename)
     fclose(file);
     return list;    
 
+}
+
+void render_dashboard(TaskList *list)
+{
+    printf("\033[2J\033[H");
+
+    printf("\033[44m=== THE UNDERWORLD TRACKER =============================\033[0m\n\n");
+
+    if (list == NULL || list->size == 0) {
+        printf("No tasks found for today. Plan your future.\n\n");
+        return;
+    }
+
+    printf("--- CURRENT TASKS ---\n");
+    for (size_t i = 0; i < list->size; i++)
+    {
+        char status_char = list->items[i]->completion_status ? 'X' : ' ';
+        const char *color = list->items[i]->completion_status ? "\033[32m" : "";
+        const char *reset = "\033[0m";
+
+        printf("[%zu] [%s%c%s] %-30s (%3d mins)\n", 
+            i, 
+            color, status_char, reset,       
+            list->items[i]->name,            
+            list->items[i]->target_duration);
+    } 
+    printf("--------------------------------------------------------\n\n");
 }
