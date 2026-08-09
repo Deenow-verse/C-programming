@@ -36,6 +36,7 @@ Task* create_task(const char* name, int duration, time_t scheduled, bool permane
 void free_list(TaskList* list);
 bool append_task(TaskList *list, Task *new_task);
 time_t get_day_start_time(void);
+bool save_tasks(TaskList *list, const char *filename);
 
 TaskList* create_list(size_t initial_capacity)
 {
@@ -124,4 +125,36 @@ time_t get_day_start_time(void)
     time_info->tm_sec = 0;
 
     return mktime(time_info);
+}
+
+bool save_tasks(TaskList *list, const char *filename)
+{
+    if (list == NULL || filename == NULL)
+    return false;
+
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Error: Could not open file %s for writing.\n", filename);
+        return false;
+    }
+
+    if (fwrite(&list->size, sizeof(size_t), 1, file) != 1)
+    {
+        fclose(file);
+        return false;
+    }
+
+    for (size_t i = 0; i < list->size; i++)
+    {
+        if (fwrite(list->items[i], sizeof(Task), 1, file) != 1)
+        {
+            fclose(file);
+            return false;
+        }
+    }
+
+    fclose(file);
+    return true;
+
 }
