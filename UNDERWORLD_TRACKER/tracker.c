@@ -39,6 +39,47 @@ time_t get_day_start_time(void);
 bool save_tasks(TaskList *list, const char *filename);
 TaskList* load_tasks(const char *filename);
 
+int main(void)
+{
+    const char *db_file = ".underworld.dat";
+
+    // 1. Try to load the database. If it doesn't exist, create a new list.
+    TaskList *today_list = load_tasks(db_file);
+    if (today_list == NULL) {
+        printf("No previous tasks found. Starting fresh.\n");
+        today_list = create_list(10);
+    } else {
+        printf("Successfully loaded %zu tasks from disk.\n", today_list->size);
+    }
+
+    // 2. Display the tasks currently in RAM
+    printf("--- CURRENT TASKS ---\n");
+    for (size_t i = 0; i < today_list->size; i++) {
+        printf("[%c] %s (%d mins)\n", 
+            today_list->items[i]->completion_status ? 'X' : ' ', 
+            today_list->items[i]->name,
+            today_list->items[i]->target_duration);
+    }
+    printf("---------------------\n");
+
+    // 3. Add a new task to prove the engine works
+    Task *t = create_task("Conquer C Programming", 120, time(NULL), true);
+    append_task(today_list, t);
+    printf("Added new task: %s\n", t->name);
+
+    // 4. Save the engine state back to the hard drive
+    if (save_tasks(today_list, db_file)) {
+        printf("Engine state saved successfully.\n");
+    } else {
+        printf("ERROR: Failed to save engine state!\n");
+    }
+
+    // 5. Clean up memory
+    free_list(today_list);
+
+    return 0;
+}
+
 TaskList* create_list(size_t initial_capacity)
 {
     TaskList *today = malloc (sizeof (TaskList));
