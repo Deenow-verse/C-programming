@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <linux/fb.h>
+#include <string.h>
 
 int main(void)
 {
@@ -36,6 +37,9 @@ int main(void)
     long screensize = vinfo.yres_virtual * finfo.line_length;
 
     fbp = (uint32_t *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+
+    uint32_t *backup_buffer = malloc(screensize);
+
     if ((intptr_t)fbp == -1)
     {
         perror("Error: failed to map framebuffer device to memory");
@@ -45,6 +49,8 @@ int main(void)
     printf("The screen is %dx%d, %d bits per pixel\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
 
     uint32_t color = 0x00FF0000; 
+
+    memcpy(backup_buffer, fbp, screensize);
 
     for (int y = 0; y < vinfo.yres; y++)
     {
@@ -58,6 +64,10 @@ int main(void)
     }
 
     sleep(3);
+
+    memcpy(fbp, backup_buffer, screensize);
+
+    free(backup_buffer);
 
     munmap(fbp, screensize);
     close(fbfd);
