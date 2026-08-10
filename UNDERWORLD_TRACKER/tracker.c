@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #define MAX 120
 
@@ -14,7 +15,7 @@ typedef struct
     int target_duration;
     time_t scheduled_time;
     bool completion_status;
-    bool is_permanent;
+    uint8_t recurrence_mask;
 } Task;
 
 typedef struct
@@ -33,7 +34,7 @@ typedef struct
 } TaskList;
 
 TaskList* create_list(size_t initial_capacity);
-Task* create_task(const char* name, int duration, time_t scheduled, bool permanent);
+Task* create_task(const char* name, int duration, time_t scheduled, uint8_t recurrence_mask);
 void free_list(TaskList* list);
 bool append_task(TaskList *list, Task *new_task);
 time_t get_day_start_time(void);
@@ -41,12 +42,22 @@ bool save_tasks(TaskList *list, const char *filename);
 TaskList* load_tasks(const char *filename);
 void render_dashboard(TaskList *list);
 void start_pomodoro(Task *task);
+TaskList* rollover_day(TaskList *old_list);
 
 int main(void)
 {
     const char *db_file = ".underworld.dat";
     
     TaskList *today_list = load_tasks(db_file);
+
+    if (today_list != NULL && today_list->size > 0)
+    {
+        if (today_list->items[0]->scheduled_time < get_day_start_time())
+        {
+            today_list = rollover_day(today_list);
+            save_tasks(today_list, db_file);
+        }
+    }
     
     while (1)
     {
@@ -102,11 +113,24 @@ int main(void)
             fgets(buffer, MAX, stdin);
             int temp_duration = atoi(buffer);
 
-            printf("Is it permanent? (1 for Yes, 0 for No):\n");
+            printf("Recurrence:\n[0] Once\n[1] Daily\n[2] Weekly (On this exact day)\nChoice: ");
             fgets(buffer, MAX, stdin);
-            bool temp_perm = atoi(buffer) == 1;
+            int rec_choice = atoi(buffer);
 
-            Task *t = create_task(temp_name, temp_duration, get_day_start_time(), temp_perm);
+            uint8_t mask = 0;
+            if (rec_choice == 1)
+            {
+                mask = 127;
+            }
+
+            else if (rec_choice == 2)
+            { 
+                time_t now = get_day_start_time();
+                struct tm *time_info = localtime(&now);
+                mask = (1 << time_info->tm_wday); 
+            }
+
+            Task *t = create_task(temp_name, temp_duration, get_day_start_time(), mask);
             append_task(today_list, t);
 
             printf("Added new task: %s\n", t->name);
@@ -197,7 +221,7 @@ TaskList* create_list(size_t initial_capacity)
     return today;
 }
 
-Task* create_task(const char* name, int duration, time_t scheduled, bool permanent)
+Task* create_task(const char* name, int duration, time_t scheduled, uint8_t recurrence_mask)
 {
     Task *newtask = malloc (sizeof (Task));
 
@@ -207,7 +231,7 @@ Task* create_task(const char* name, int duration, time_t scheduled, bool permane
     newtask -> completion_status = false;
     newtask -> target_duration = duration;
     newtask -> scheduled_time = scheduled;
-    newtask->is_permanent = permanent;
+    newtask-> recurrence_mask = recurrence_mask;
 
     return newtask;
 }
@@ -394,4 +418,55 @@ void start_pomodoro(Task *task)
     task->completion_status = true;
     
     return;
+}
+
+TaskList* rollover_day(TaskList *old_list)
+{
+    DailySummary summary = {0};
+
+    if (old_list->size > 0)
+    {
+        summary.now = old_list->items[0]->scheduled_time;
+        summary.total_task = old_list->size;
+
+        for (size_t i = 0; i < old_list->size; i++)
+        {
+            if (old_list->items[i]->completion_status == true)
+            {
+                summary.completed_tasks++;
+                summary.total_minutes_logged += old_list->items[i]->target_duration;
+            }
+        }
+
+        const char *hist_file = ".underworld_history.dat";
+        FILE *file = fopen(hist_file, "ab");
+        if (file != NULL)
+        {
+            fwrite(&summary, sizeof(DailySummary), 1, file);
+            fclose(file);
+        }
+    }
+
+    time_t new_day_time = get_day_start_time();
+    struct tm *new_day_info = localtime(&new_day_time);
+    int new_wday = new_day_info->tm_wday;
+
+    TaskList *new_list = create_list(10);
+
+    for (size_t i = 0; i < old_list->size; i++)
+    {
+        if (old_list->items[i]->recurrence_mask & (1 << new_wday))
+        {
+            Task *cloned_task = create_task(
+                old_list->items[i]->name, 
+                old_list->items[i]->target_duration, 
+                new_day_time, 
+                old_list->items[i]->recurrence_mask
+            );
+            append_task(new_list, cloned_task);
+        }
+    }
+
+    free_list(old_list);
+    return new_list;
 }
