@@ -43,6 +43,7 @@ TaskList* load_tasks(const char *filename);
 void render_dashboard(TaskList *list);
 void start_pomodoro(Task *task);
 TaskList* rollover_day(TaskList *old_list);
+void render_calendar(void);
 
 int main(void)
 {
@@ -72,27 +73,6 @@ int main(void)
 
         size_t option;
         scanf ("%zu", &option);
-
-      /* if (option == 1)
-        {
-            if (today_list == NULL)
-            {
-                printf("No previous tasks found. Starting fresh.\n");
-                today_list = create_list(10);
-            }
-
-           else
-           {
-                printf("Successfully loaded %zu tasks from disk.\n", today_list->size);
-           }
-
-            printf("--- CURRENT TASKS ---\n");
-            for (size_t i = 0; i < today_list->size; i++)
-            {
-                printf("[%zu] [%c] %s (%d mins)\n", i, today_list->items[i]->completion_status ? 'X' : ' ', today_list->items[i]->name, today_list->items[i]->target_duration);
-            }
-            printf("---------------------\n");
-        }*/
 
         if (option == 2)
         {
@@ -377,6 +357,9 @@ void render_dashboard(TaskList *list)
 
     printf("\033[44m=== THE UNDERWORLD TRACKER =============================\033[0m\n\n");
 
+    render_calendar();
+    printf ("\n");
+
     if (list == NULL || list->size == 0) {
         printf("No tasks found for today. Plan your future.\n\n");
         return;
@@ -469,4 +452,50 @@ TaskList* rollover_day(TaskList *old_list)
 
     free_list(old_list);
     return new_list;
+}
+
+void render_calendar(void)
+{
+    int i = 0;
+    DailySummary Buffer_history [MAX];
+    FILE *file = fopen(".underworld_history.dat", "rb");
+    if (file == NULL)
+    {
+        printf ("No history yet.\n");
+        return;
+    }
+
+    while (fread(&Buffer_history[i], sizeof (Buffer_history[i]), 1, file ) == 1)
+    {
+        int percent = 0;
+
+        if (Buffer_history[i].total_task > 0)
+        percent = (Buffer_history [i].completed_tasks * 100) / Buffer_history [i].total_task;
+
+        else
+        break;
+
+        if (percent == 0)
+        {
+            printf ("\033[0m [ ] \033[0m");
+        }
+
+        else if (percent >= 1 && percent <=49)
+        {
+            printf ("\033[48;5;117m [ ] \033[0m");
+        }
+
+        else if (percent >= 50 && percent <= 99)
+        {
+            printf ("\033[48;5;33m [ ] \033[0m");
+        }
+
+        else
+        printf ("\033[48;5;21m\033[37m [X] \033[0m");
+
+        ++i;
+        
+    }
+
+    fclose (file);
 }
