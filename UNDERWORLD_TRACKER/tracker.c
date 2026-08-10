@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define MAX 120
 
@@ -39,6 +40,7 @@ time_t get_day_start_time(void);
 bool save_tasks(TaskList *list, const char *filename);
 TaskList* load_tasks(const char *filename);
 void render_dashboard(TaskList *list);
+void start_pomodoro(Task *task);
 
 int main(void)
 {
@@ -54,10 +56,11 @@ int main(void)
         printf ("[2] Add a New Task\n");
         printf ("[3] Mark Task Complete\n");
         printf ("[4] Exit and Save\n");
-        printf ("PLAN YOUR FUTURE\n");
+        printf ("[5] Start Focus Block\n");
+        printf ("\n\nPLAN YOUR FUTURE\n");
 
-        int option;
-        scanf ("%d", &option);
+        size_t option;
+        scanf ("%zu", &option);
 
       /* if (option == 1)
         {
@@ -120,10 +123,8 @@ int main(void)
             ++i;
         }
 
-        if (option == 3)
+        else if (option == 3)
         {
-            size_t number = 0;
-
             if (today_list == NULL)
             printf ("No saved task\n");
 
@@ -138,12 +139,12 @@ int main(void)
             }*/
             
             printf ("ENTER THE TASK NUMBER YOU HAVE FOR THE TASK YOU HAVE COMPLETED\n");
-            scanf ("%zu", &number);
+            scanf ("%zu", &option);
 
-            if (number >= 0 && number < today_list->size)
+            if (option >= 0 && option < today_list->size)
             {
-                today_list->items[number]->completion_status = true; 
-                printf("Task %zu marked complete!\n", number);
+                today_list->items[option]->completion_status = true; 
+                printf("Task %zu marked complete!\n", option);
             }
             else
             {
@@ -152,12 +153,23 @@ int main(void)
 
         }
 
-        if (option == 4)
+        else if (option == 4)
         {
             save_tasks (today_list, db_file);
             free_list(today_list);
             break;
         }
+
+        else if (option == 5)
+        {
+            printf ("which task do you want to focus on? ");
+            scanf ("%zu", &option);
+
+            start_pomodoro (today_list -> items [option]);
+        }
+
+        else
+        printf ("You have entered the wrong option. Please select from the above displayed options");
 
     }    
 
@@ -360,4 +372,26 @@ void render_dashboard(TaskList *list)
             list->items[i]->target_duration);
     } 
     printf("--------------------------------------------------------\n\n");
+}
+
+void start_pomodoro(Task *task)
+{
+    int total_seconds = task->target_duration * 60;
+
+    while(total_seconds > 0)
+    {
+        int minutes = total_seconds / 60;
+        int seconds = total_seconds % 60;
+
+        printf("\rTime remaining: %02d:%02d", minutes, seconds);
+        fflush(stdout);
+
+        sleep(1);
+        --total_seconds;
+    }
+
+    printf("\nFocus block complete!\n"); sleep(2);
+    task->completion_status = true;
+    
+    return;
 }
