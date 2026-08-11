@@ -1,8 +1,9 @@
-#include <stdio.h>
+#include <unistd.h>
 #include "engine.h"
 
 int main (void)
 {
+    int target_time_per_frame = 16666;
     Engine_InitWindow (800, 600, "Underworld Tracker");
 
     RGBA_Colour bg = {20, 20, 20, 255};
@@ -17,6 +18,8 @@ int main (void)
         Engine_DrawRectangle   (32, 48, 720, 480, paint);
 
         Engine_EndDrawing   ();
+
+        usleep(target_time_per_frame);
     }       
 
     Engine_CloseWindow     ();
