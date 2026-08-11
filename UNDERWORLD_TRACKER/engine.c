@@ -13,6 +13,7 @@ Pixmap back_buffer;
 int screen;
 GC gc;
 bool should_close = false;
+bool needs_resize = false;
 int current_width = 0; 
 int current_height = 0;
 
@@ -83,14 +84,22 @@ void Engine_BeginDrawing(void)
 
             if (new_width != current_width || new_height != current_height)
             {
-                XFreePixmap(display, back_buffer);
-                back_buffer = XCreatePixmap(display, window, new_width, new_height, DefaultDepth(display, screen));
-
                 current_width = new_width ;
                 current_height = new_height;
+
+                needs_resize = true;
             }
         }
     }
+
+     if (needs_resize)
+    {
+
+        XFreePixmap(display, back_buffer);
+        back_buffer = XCreatePixmap(display, window, current_width, current_height, DefaultDepth(display, screen));
+        needs_resize = false;
+    }
+    
 }
 
 void Engine_EndDrawing(void)
