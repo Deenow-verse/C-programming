@@ -48,6 +48,8 @@ void Engine_InitWindow(int width, int height, const char* title)
     XStoreName(display, window, title);
     XMapWindow(display, window);
 
+    XSetWindowBackgroundPixmap(display, window, None);
+
     gc = XCreateGC(display, window, 0, NULL);
 }
 
@@ -99,7 +101,7 @@ void Engine_BeginDrawing(void)
         back_buffer = XCreatePixmap(display, window, current_width, current_height, DefaultDepth(display, screen));
         needs_resize = false;
     }
-    
+
 }
 
 void Engine_EndDrawing(void)
