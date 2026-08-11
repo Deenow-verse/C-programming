@@ -5,8 +5,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define DEPTH() DefaultDepth(display, screen) 
+
 Display *display;
 Window window;
+Pixmap back_buffer;
 int screen;
 GC gc;
 bool should_close = false;
@@ -29,6 +32,8 @@ void Engine_InitWindow(int width, int height, const char* title)
 
     window = XCreateSimpleWindow(display, RootWindow(display, screen), 10, 10, width, height, 1, BlackPixel(display, screen), WhitePixel(display, screen));
 
+    back_buffer = XCreatePixmap(display, window, width, height, DefaultDepth(display, screen));
+
     Atom wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(display, window, &wmDeleteMessage, 1);
 
@@ -43,6 +48,7 @@ void Engine_InitWindow(int width, int height, const char* title)
 void Engine_CloseWindow(void) 
 {
     XFreeGC(display, gc);
+    XFreePixmap(display, back_buffer);
     XDestroyWindow(display, window);
     XCloseDisplay(display);
 }
@@ -69,6 +75,9 @@ void Engine_BeginDrawing(void)
 
 void Engine_EndDrawing(void)
 {
+    XWindowAttributes wa;
+    XGetWindowAttributes(display, window, &wa);
+    XCopyArea(display, back_buffer, window, gc, 0, 0, wa.width, wa.height, 0, 0);
     XFlush(display);
 }
 
@@ -77,11 +86,11 @@ void Engine_ClearBackground(RGBA_Colour color)
     XSetForeground(display, gc, _ColorToX11Pixel(color));
     XWindowAttributes wa;
     XGetWindowAttributes(display, window, &wa);
-    XFillRectangle(display, window, gc, 0, 0, wa.width, wa.height);
+    XFillRectangle(display, back_buffer, gc, 0, 0, wa.width, wa.height);
 }
 
 void Engine_DrawRectangle(int x, int y, int width, int height, RGBA_Colour color)
 {
     XSetForeground(display, gc, _ColorToX11Pixel(color));
-    XFillRectangle(display, window, gc, x, y, width, height);
+    XFillRectangle(display, back_buffer, gc, x, y, width, height);
 }
