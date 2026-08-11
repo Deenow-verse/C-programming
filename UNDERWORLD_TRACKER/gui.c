@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <unistd.h>
 #include "engine.h"
 
@@ -33,6 +34,11 @@ int main (void)
             {
                 Engine_DrawRectangle (column, row, 5, 5, square);
             }
+        }
+
+        if (Engine_IsMouseButtonPressed ())
+        {
+            printf ("the mouse cordinates are %d along the x axis and %d along the y axis\n", Engine_GetMouseX (), Engine_GetMouseY ());
         }
 
         Engine_EndDrawing   ();

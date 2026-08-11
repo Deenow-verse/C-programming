@@ -12,10 +12,16 @@ Window window;
 Pixmap back_buffer;
 int screen;
 GC gc;
+
 bool should_close = false;
 bool needs_resize = false;
+
 int current_width = 0; 
 int current_height = 0;
+
+int mouse_x = 0;
+int mouse_y = 0;
+bool mouse_pressed = false;
 
 unsigned long _ColorToX11Pixel(RGBA_Colour c)
 {
@@ -43,7 +49,7 @@ void Engine_InitWindow(int width, int height, const char* title)
     Atom wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(display, window, &wmDeleteMessage, 1);
 
-    XSelectInput(display, window, ExposureMask | KeyPressMask | StructureNotifyMask);
+    XSelectInput(display, window, ExposureMask | KeyPressMask | StructureNotifyMask | ButtonPressMask | PointerMotionMask);
 
     XStoreName(display, window, title);
     XMapWindow(display, window);
@@ -69,6 +75,7 @@ bool Engine_WindowShouldClose(void)
 void Engine_BeginDrawing(void)
 {
     XEvent event;
+    mouse_pressed = false;
 
     while (XPending(display) > 0)
     {
@@ -92,6 +99,21 @@ void Engine_BeginDrawing(void)
                 needs_resize = true;
             }
         }
+
+        if (event.type == ButtonPress)
+        {
+            if (event.xbutton.button == 1)
+            {
+                mouse_pressed = true;
+            }
+        }
+
+        if (event.type == MotionNotify)
+        {
+            mouse_x = event.xmotion.x;
+            mouse_y = event.xmotion.y;
+        }
+
     }
 
      if (needs_resize)
@@ -124,4 +146,19 @@ void Engine_DrawRectangle(int x, int y, int width, int height, RGBA_Colour color
 {
     XSetForeground(display, gc, _ColorToX11Pixel(color));
     XFillRectangle(display, back_buffer, gc, x, y, width, height);
+}
+
+int Engine_GetMouseX(void)
+{
+    return mouse_x;
+}
+
+int Engine_GetMouseY(void)
+{
+    return mouse_y;
+}
+
+bool Engine_IsMouseButtonPressed(void)
+{
+    return mouse_pressed;
 }

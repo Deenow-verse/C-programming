@@ -14,3 +14,9 @@ void Engine_EndDrawing(void);
 void Engine_ClearBackground(RGBA_Colour color);
 
 void Engine_DrawRectangle(int x, int y, int width, int height, RGBA_Colour color);
+
+int Engine_GetMouseX(void);
+
+int Engine_GetMouseY(void);
+
+bool Engine_IsMouseButtonPressed(void);
