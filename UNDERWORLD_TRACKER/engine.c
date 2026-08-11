@@ -13,6 +13,8 @@ Pixmap back_buffer;
 int screen;
 GC gc;
 bool should_close = false;
+int current_width = 0; 
+int current_height = 0;
 
 unsigned long _ColorToX11Pixel(RGBA_Colour c)
 {
@@ -21,6 +23,9 @@ unsigned long _ColorToX11Pixel(RGBA_Colour c)
 
 void Engine_InitWindow(int width, int height, const char* title)
 {
+    current_width = width; 
+    current_height = height;
+
     display = XOpenDisplay(NULL);
     if (display == NULL)
     {
@@ -37,7 +42,7 @@ void Engine_InitWindow(int width, int height, const char* title)
     Atom wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(display, window, &wmDeleteMessage, 1);
 
-    XSelectInput(display, window, ExposureMask | KeyPressMask);
+    XSelectInput(display, window, ExposureMask | KeyPressMask | StructureNotifyMask);
 
     XStoreName(display, window, title);
     XMapWindow(display, window);
@@ -69,6 +74,21 @@ void Engine_BeginDrawing(void)
         if (event.type == ClientMessage)
         {
             should_close = true;
+        }
+
+        if (event.type == ConfigureNotify)
+        {
+            int new_width = event.xconfigure.width;    
+            int new_height = event.xconfigure.height;
+
+            if (new_width != current_width || new_height != current_height)
+            {
+                XFreePixmap(display, back_buffer);
+                back_buffer = XCreatePixmap(display, window, new_width, new_height, DefaultDepth(display, screen));
+
+                current_width = new_width ;
+                current_height = new_height;
+            }
         }
     }
 }
