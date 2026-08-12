@@ -1,3 +1,6 @@
+#ifndef ENGINE_H
+#define ENGINE_H
+
 #include <stdbool.h>
 #include "my_math.h"
 
@@ -20,3 +23,5 @@ int Engine_GetMouseX(void);
 int Engine_GetMouseY(void);
 
 bool Engine_IsMouseButtonPressed(void);
+
+#endif

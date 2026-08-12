@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "engine.h"
+#include "my_math.h"
 
 int main (void)
 {
     int target_time_per_frame = 16666;
+    Rectangle clock_btn = {725, 745, 90, 90};
     Engine_InitWindow (800, 600, "Underworld Tracker");
 
     RGBA_Colour bg = {255, 255, 255, 255};
@@ -24,7 +26,7 @@ int main (void)
 
         Engine_DrawRectangle   (700, 720, 900, 240, center);
 
-        Engine_DrawRectangle   (725, 745 , 90, 90, clock);
+        Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock);
 
         Engine_DrawRectangle   (896, 854, 692, 94, grid);
 
@@ -36,9 +38,14 @@ int main (void)
             }
         }
 
-        if (Engine_IsMouseButtonPressed ())
+        if (Engine_IsMouseButtonPressed())
         {
-            printf ("the mouse cordinates are %d along the x axis and %d along the y axis\n", Engine_GetMouseX (), Engine_GetMouseY ());
+            Vector2D mouse_pos = { (float)Engine_GetMouseX(), (float)Engine_GetMouseY() };
+            
+            if (CheckCollisionPointRec(mouse_pos, clock_btn))
+            {
+                printf("CLOCK INITIATED!\n");
+            }
         }
 
         Engine_EndDrawing   ();

@@ -1,3 +1,7 @@
+#ifndef MY_MATH_H    
+#define MY_MATH_H
+
+#include <stdbool.h>
 typedef struct
 {
     float x;
@@ -19,3 +23,7 @@ typedef struct
     float width;
     float length;
 } Rectangle;
+
+bool CheckCollisionPointRec(Vector2D point, Rectangle rec);
+
+#endif
