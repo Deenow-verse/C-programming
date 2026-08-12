@@ -11,7 +11,10 @@ int main (void)
     Rectangle clock_btn = {725, 745, 90, 90};
     bool is_timer_running = false;
     Engine_InitWindow (800, 600, "Underworld Tracker");
-
+    time_t start_time = 0;
+    int total_seconds = 25 * 60;
+    int remaining_seconds = total_seconds;
+    
     RGBA_Colour bg = {255, 255, 255, 255};
     RGBA_Colour center = {198, 228, 255, 255};
     RGBA_Colour clock = {246, 114, 56, 255  };
@@ -22,6 +25,7 @@ int main (void)
 
     while (!Engine_WindowShouldClose())
     {
+        
         Engine_BeginDrawing ();
 
         Engine_ClearBackground (bg);
@@ -31,11 +35,25 @@ int main (void)
         Engine_DrawRectangle   (700, 720, 900, 240, center);
 
         if (is_timer_running)
-        Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock_active);
+        {
+            Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock_active);
+            time_t now = time(NULL);
+            double elapsed = difftime(now, start_time);
+            remaining_seconds = total_seconds - (int)elapsed;
 
+            if (remaining_seconds <= 0)
+            {
+                is_timer_running = false; 
+                remaining_seconds = total_seconds;   
+            }
+            else
+            {
+                printf("Time remaining: %d\r", remaining_seconds);
+                fflush(stdout);
+            }
+        }
         else
         Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock);
-
 
         Engine_DrawRectangle   (896, 854, 692, 94, grid);
 
@@ -54,13 +72,17 @@ int main (void)
             if (CheckCollisionPointRec(mouse_pos, clock_btn))
             {
                 is_timer_running = !is_timer_running;
+
+                if (is_timer_running)
+                start_time = time(NULL);
             }
         }
+    
 
         Engine_EndDrawing   ();
-
-        usleep(target_time_per_frame);
-    }       
+ 
+        usleep(target_time_per_frame);  
+    }   
 
     Engine_CloseWindow     ();
 
