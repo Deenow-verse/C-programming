@@ -7,11 +7,13 @@ int main (void)
 {
     int target_time_per_frame = 16666;
     Rectangle clock_btn = {725, 745, 90, 90};
+    bool is_timer_running = false;
     Engine_InitWindow (800, 600, "Underworld Tracker");
 
     RGBA_Colour bg = {255, 255, 255, 255};
     RGBA_Colour center = {198, 228, 255, 255};
     RGBA_Colour clock = {246, 114, 56, 255  };
+    RGBA_Colour clock_active = {46, 204, 113, 255};
     RGBA_Colour grid = {236, 236, 242, 255};
     RGBA_Colour square ={56, 139, 253, 255};
     RGBA_Colour sidebar = {219, 109, 40, 255};
@@ -26,7 +28,12 @@ int main (void)
 
         Engine_DrawRectangle   (700, 720, 900, 240, center);
 
+        if (is_timer_running)
+        Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock_active);
+
+        else
         Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock);
+
 
         Engine_DrawRectangle   (896, 854, 692, 94, grid);
 
@@ -44,7 +51,7 @@ int main (void)
             
             if (CheckCollisionPointRec(mouse_pos, clock_btn))
             {
-                printf("CLOCK INITIATED!\n");
+                is_timer_running = !is_timer_running;
             }
         }
 
