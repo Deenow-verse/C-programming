@@ -4,10 +4,17 @@
 
 int main (void)
 {
+    int screen_width = 1920;
+    int screen_height = 1080;
+
     int target_time_per_frame = 16666;
-    Rectangle clock_btn = {725, 745, 90, 90};
+    Rectangle clock_btn;
+    clock_btn.width = 90;
+    clock_btn.length = 90;
+    clock_btn.x = screen_width - clock_btn.width - 50;
+    clock_btn.y =  50;
     bool is_timer_running = false;
-    Engine_InitWindow (800, 600, "Underworld Tracker");
+    Engine_InitWindow (screen_width, screen_height, "Underworld Tracker");
     time_t start_time = 0;
     int total_seconds = 25 * 60;
     int remaining_seconds = total_seconds;
@@ -40,18 +47,18 @@ int main (void)
 
         Engine_ClearBackground (bg);
 
-        Engine_DrawRectangle   (0, 0, 210, 1000, sidebar);
+        Engine_DrawRectangle   (0, 0, 210, screen_height, sidebar);
 
-        Engine_DrawRectangle   (700, 720, 900, 240, center);
+        Engine_DrawRectangle(210, 0, screen_width - 210, screen_height, center);
 
         for (int i = 0; i < today_list->size; ++i)
         {
             int text_y = 100 + (i * 30); 
-            Engine_DrawText (700, text_y, today_list ->items[i]-> name, text);
+            Engine_DrawText (240, text_y, today_list ->items[i]-> name, text);
 
             char duration_text[32];
             snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[i]->target_duration);
-            Engine_DrawText (700 + 200, text_y, duration_text, text);
+            Engine_DrawText (240 + 300, text_y, duration_text, text);
         }            
 
         if (is_timer_running)
