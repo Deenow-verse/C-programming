@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <time.h>
 #include "engine.h"
 #include "my_math.h"
 #include "tracker.h"
@@ -22,6 +19,19 @@ int main (void)
     RGBA_Colour grid = {236, 236, 242, 255};
     RGBA_Colour square ={56, 139, 253, 255};
     RGBA_Colour sidebar = {219, 109, 40, 255};
+    RGBA_Colour text = {0, 0, 0, 255};
+
+    const char *db_file = ".underworld.dat";
+    TaskList *today_list = load_tasks(db_file);
+
+    if (today_list != NULL && today_list->size > 0)
+    {
+        if (today_list->items[0]->scheduled_time < get_day_start_time())
+        {
+            today_list = rollover_day(today_list);
+            save_tasks(today_list, db_file);
+        }
+    }
 
     while (!Engine_WindowShouldClose())
     {
@@ -33,6 +43,16 @@ int main (void)
         Engine_DrawRectangle   (0, 0, 210, 1000, sidebar);
 
         Engine_DrawRectangle   (700, 720, 900, 240, center);
+
+        for (int i = 0; i < today_list->size; ++i)
+        {
+            int text_y = 100 + (i * 30); 
+            Engine_DrawText (700, text_y, today_list ->items[i]-> name, text);
+
+            char duration_text[32];
+            snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[i]->target_duration);
+            Engine_DrawText (700 + 200, text_y, duration_text, text);
+        }            
 
         if (is_timer_running)
         {
@@ -77,8 +97,6 @@ int main (void)
                 start_time = time(NULL);
             }
         }
-
-        Engine_DrawText(50, 50, "SYSTEM INITIALIZED", clock);    
 
         Engine_EndDrawing   ();
  
