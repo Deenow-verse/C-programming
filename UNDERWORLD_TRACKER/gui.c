@@ -77,7 +77,8 @@ int main (void)
                 start_time = time(NULL);
             }
         }
-    
+
+        Engine_DrawText(50, 50, "SYSTEM INITIALIZED", clock);    
 
         Engine_EndDrawing   ();
  

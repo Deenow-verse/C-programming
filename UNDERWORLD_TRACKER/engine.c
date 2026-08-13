@@ -1,10 +1,5 @@
 #include "engine.h"
-#include <X11/Xutil.h>
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
+       
 #define DEPTH() DefaultDepth(display, screen) 
 
 Display *display;
@@ -12,6 +7,8 @@ Window window;
 Pixmap back_buffer;
 int screen;
 GC gc;
+XftFont *font;
+XftDraw *xft_draw;
 
 bool should_close = false;
 bool needs_resize = false;
@@ -46,6 +43,15 @@ void Engine_InitWindow(int width, int height, const char* title)
 
     back_buffer = XCreatePixmap(display, window, width, height, DefaultDepth(display, screen));
 
+    font = XftFontOpen(display, screen, XFT_FAMILY, XftTypeString, "sans", XFT_SIZE, XftTypeDouble, 12.0,NULL);
+
+    if (font == NULL)
+    {
+        fprintf (stderr, "No font to load\n");
+        exit(1);
+    }
+    xft_draw = XftDrawCreate(display, back_buffer, DefaultVisual(display, screen), DefaultColormap(display, screen));
+
     Atom wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(display, window, &wmDeleteMessage, 1);
 
@@ -60,7 +66,9 @@ void Engine_InitWindow(int width, int height, const char* title)
 }
 
 void Engine_CloseWindow(void) 
-{
+{  
+    XftDrawDestroy(xft_draw);
+    XftFontClose(display, font);
     XFreeGC(display, gc);
     XFreePixmap(display, back_buffer);
     XDestroyWindow(display, window);
@@ -120,7 +128,9 @@ void Engine_BeginDrawing(void)
     {
 
         XFreePixmap(display, back_buffer);
+        XftDrawDestroy(xft_draw); 
         back_buffer = XCreatePixmap(display, window, current_width, current_height, DefaultDepth(display, screen));
+        xft_draw = XftDrawCreate(display, back_buffer, DefaultVisual(display, screen), DefaultColormap(display, screen));
         needs_resize = false;
     }
 
@@ -161,4 +171,19 @@ int Engine_GetMouseY(void)
 bool Engine_IsMouseButtonPressed(void)
 {
     return mouse_pressed;
+}
+
+void Engine_DrawText(int x, int y, const char* text, RGBA_Colour color)
+{
+    XRenderColor xr_color;
+
+    xr_color.red = color.r <<8; 
+    xr_color.green = color.g <<8; 
+    xr_color.blue = color.b <<8; 
+    xr_color.alpha = color.a <<8; 
+
+    XftColor xft_color;
+    XftColorAllocValue(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &xr_color, &xft_color);
+    XftDrawStringUtf8(xft_draw, &xft_color, font, x, y, (XftChar8 *)text, strlen(text));
+    XftColorFree(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &xft_color);
 }
