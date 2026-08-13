@@ -75,8 +75,12 @@ int main (void)
             }
             else
             {
-                printf("Time remaining: %d\r", remaining_seconds);
-                fflush(stdout);
+                int mins = remaining_seconds / 60;
+                int secs = remaining_seconds % 60;
+                
+                char timer_text[16];
+                snprintf(timer_text, sizeof(timer_text), "%02d:%02d", mins, secs);
+                Engine_DrawText (clock_btn.x + 23, clock_btn.y + 45, timer_text, text);
             }
         }
         else
