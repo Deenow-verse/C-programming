@@ -65,7 +65,13 @@ int main (void)
             char duration_text[32];
             snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[i]->target_duration);  
 
-            if(i == active_task)
+            if (today_list->items[i]->completion_status == true)
+            {
+                Engine_DrawText (240 + 300, text_y, duration_text, clock_active);
+                Engine_DrawText (240, text_y, today_list ->items[i]-> name, clock_active);
+            }
+            
+            else if(i == active_task)
             {
                 Engine_DrawText (240 + 300, text_y, duration_text, clock);
                 Engine_DrawText (240, text_y, today_list ->items[i]-> name, clock);
@@ -88,7 +94,13 @@ int main (void)
             if (remaining_seconds <= 0)
             {
                 is_timer_running = false; 
-                remaining_seconds = total_seconds;   
+                remaining_seconds = total_seconds;  
+                
+                if (active_task != -1)
+                {
+                    today_list->items[active_task]->completion_status = true;
+                    save_tasks(today_list, db_file);
+                }
             }
             else
             {
@@ -152,6 +164,8 @@ int main (void)
     }   
 
     Engine_CloseWindow     ();
+
+    free_list(today_list);
 
     return 0;
 }
