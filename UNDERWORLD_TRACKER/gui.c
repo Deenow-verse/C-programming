@@ -158,6 +158,10 @@ int main (void)
 
         }
 
+        int key = Engine_GetPressedKey();
+        if (key != 0)
+        printf("Key pressed: %c (ASCII: %d)\n", key, key);
+
         Engine_EndDrawing   ();
  
         usleep(target_time_per_frame);  

@@ -20,6 +20,8 @@ int mouse_x = 0;
 int mouse_y = 0;
 bool mouse_pressed = false;
 
+int last_key_pressed = 0;
+
 unsigned long _ColorToX11Pixel(RGBA_Colour c)
 {
     return (c.r << 16) | (c.g << 8) | c.b;
@@ -85,9 +87,36 @@ void Engine_BeginDrawing(void)
     XEvent event;
     mouse_pressed = false;
 
+    last_key_pressed = 0;
+
     while (XPending(display) > 0)
     {
         XNextEvent(display, &event);
+
+        if (event.type == KeyPress)
+        {
+            char key_buffer[16];
+            KeySym keysym;
+
+            int length = XLookupString(&event.xkey, key_buffer, sizeof(key_buffer), &keysym, NULL);
+    
+            if (length > 0)
+            {
+                last_key_pressed = key_buffer[0];
+            }
+
+            if (keysym == XK_BackSpace)
+            {
+                last_key_pressed = 8;
+            }
+    
+
+            if (keysym == XK_Return)
+            {
+                last_key_pressed = 10;
+            }
+
+        }
 
         if (event.type == ClientMessage)
         {
@@ -186,4 +215,9 @@ void Engine_DrawText(int x, int y, const char* text, RGBA_Colour color)
     XftColorAllocValue(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &xr_color, &xft_color);
     XftDrawStringUtf8(xft_draw, &xft_color, font, x, y, (XftChar8 *)text, strlen(text));
     XftColorFree(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &xft_color);
+}
+
+int Engine_GetPressedKey(void)
+{
+    return last_key_pressed;
 }
