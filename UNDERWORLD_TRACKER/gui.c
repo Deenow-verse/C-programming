@@ -9,6 +9,11 @@ int main (void)
 
     int target_time_per_frame = 16666;
     Rectangle clock_btn;
+    Rectangle list;
+    list.width =screen_width - 210;
+    list.length = screen_height;
+    list.x = 210;
+    list.y = 0;
     clock_btn.width = 90;
     clock_btn.length = 90;
     clock_btn.x = screen_width - clock_btn.width - 50;
@@ -16,8 +21,10 @@ int main (void)
     bool is_timer_running = false;
     Engine_InitWindow (screen_width, screen_height, "Underworld Tracker");
     time_t start_time = 0;
-    int total_seconds = 25 * 60;
+    int task_duration = 0;
+    int total_seconds = task_duration * 60;
     int remaining_seconds = total_seconds;
+    int active_task = -1;
     
     RGBA_Colour bg = {255, 255, 255, 255};
     RGBA_Colour center = {198, 228, 255, 255};
@@ -49,16 +56,26 @@ int main (void)
 
         Engine_DrawRectangle   (0, 0, 210, screen_height, sidebar);
 
-        Engine_DrawRectangle(210, 0, screen_width - 210, screen_height, center);
+        Engine_DrawRectangle(list.x, list.y, list.width, list.length , center);
 
         for (int i = 0; i < today_list->size; ++i)
         {
             int text_y = 100 + (i * 30); 
-            Engine_DrawText (240, text_y, today_list ->items[i]-> name, text);
 
             char duration_text[32];
-            snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[i]->target_duration);
-            Engine_DrawText (240 + 300, text_y, duration_text, text);
+            snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[i]->target_duration);  
+
+            if(i == active_task)
+            {
+                Engine_DrawText (240 + 300, text_y, duration_text, clock);
+                Engine_DrawText (240, text_y, today_list ->items[i]-> name, clock);
+            }
+            else
+            {
+                Engine_DrawText (240 + 300, text_y, duration_text, text);              
+                Engine_DrawText (240, text_y, today_list ->items[i]-> name, text);
+            }
+            
         }            
 
         if (is_timer_running)
@@ -99,14 +116,34 @@ int main (void)
         if (Engine_IsMouseButtonPressed())
         {
             Vector2D mouse_pos = { (float)Engine_GetMouseX(), (float)Engine_GetMouseY() };
-            
+
             if (CheckCollisionPointRec(mouse_pos, clock_btn))
             {
-                is_timer_running = !is_timer_running;
-
-                if (is_timer_running)
-                start_time = time(NULL);
+                if (total_seconds > 0)
+                {
+                    is_timer_running = !is_timer_running;
+                    
+                    if (is_timer_running)
+                    start_time = time(NULL);
+                }
+                
             }
+            
+            else if (CheckCollisionPointRec (mouse_pos, list))
+            {
+                int list_number;
+                list_number = (mouse_pos.y - 100) / 30;
+
+                if (list_number >= 0 && list_number < today_list->size)
+                {
+                    task_duration = today_list -> items [list_number] -> target_duration;
+                    active_task = list_number;
+                    total_seconds = task_duration * 60;
+                    remaining_seconds = total_seconds;
+                    is_timer_running = false;
+                }
+            }
+
         }
 
         Engine_EndDrawing   ();
