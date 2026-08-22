@@ -45,6 +45,10 @@ int main (void)
     RGBA_Colour square ={56, 139, 253, 255};
     RGBA_Colour sidebar = {219, 109, 40, 255};
     RGBA_Colour text = {0, 0, 0, 255};
+    RGBA_Colour low_activity = {255, 212, 166, 255};
+    RGBA_Colour medium_activity = {254, 173, 98, 255};
+    RGBA_Colour optimum_activity = {247, 127, 0, 255};
+    RGBA_Colour high_activity = {214, 73, 0, 255};
 
     const char *db_file = ".underworld.dat";
     TaskList *today_list = load_tasks(db_file);
@@ -89,13 +93,32 @@ int main (void)
         int start_x = 210 + ((screen_width - 210) / 2) - (grid_width / 2);
         int start_y = screen_height - grid_height - 60;
 
+        int heatmap_scores[364] = {0};
+        time_t today_midnight = get_day_start_time();
+
+        for (int i = 0; i < 364; i++)
+        {
+            time_t target = today_midnight - ((363 - i) * 86400);
+            heatmap_scores[i] = get_completed_tasks_count(db_file, target);
+        }
+
         for (int col = 0; col < total_cols; col++)
         {
             for (int row = 0; row < total_rows; row++)
             {
                 int x = start_x + col * (box_size + padding);
                 int y = start_y + row * (box_size + padding);
-                Engine_DrawRectangle(x, y, box_size, box_size, grid);
+                
+                int day_index = (col * total_rows) + row;
+                int score = heatmap_scores[day_index];
+
+                RGBA_Colour cell_color = grid;
+                if (score > 0 && score <= 5) cell_color = low_activity;
+                if (score > 5 && score <= 8) cell_color = medium_activity;
+                if (score > 8 && score <= 15) cell_color = medium_activity;
+                if (score > 15) cell_color = high_activity;
+                
+                Engine_DrawRectangle(x, y, box_size, box_size, cell_color);
             }
         }
 

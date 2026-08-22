@@ -219,3 +219,26 @@ TaskList* rollover_day(TaskList *old_list)
     free_list(old_list);
     return new_list;
 }
+
+int get_completed_tasks_count(const char *filename, time_t target_day)
+{
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL)
+    {
+        return 0; 
+    }
+
+    int count = 0;
+    Task temp_task;
+
+    while (fread(&temp_task, sizeof(Task), 1, file) == 1)
+    {
+        if (temp_task.completion_status == true && temp_task.scheduled_time == target_day)
+        {
+            count++;
+        }
+    }
+
+    fclose(file);
+    return count;
+}

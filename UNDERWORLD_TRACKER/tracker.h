@@ -44,5 +44,6 @@ time_t get_day_start_time(void);
 bool save_tasks(TaskList *list, const char *filename);
 TaskList* load_tasks(const char *filename);
 TaskList* rollover_day(TaskList *old_list);
+int get_completed_tasks_count(const char *filename, time_t target_day);
 
 #endif
