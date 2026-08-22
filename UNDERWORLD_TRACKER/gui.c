@@ -8,18 +8,29 @@ int main (void)
     int screen_height = 1080;
 
     int target_time_per_frame = 16666;
+
     Rectangle clock_btn;
     Rectangle list;
+    Rectangle input_box = {240, 40, 600, 40};
+
     list.width =screen_width - 210;
     list.length = screen_height;
     list.x = 210;
     list.y = 0;
+
     clock_btn.width = 90;
     clock_btn.length = 90;
     clock_btn.x = screen_width - clock_btn.width - 50;
     clock_btn.y =  50;
+
     bool is_timer_running = false;
+
+    bool is_typing = false;
+    char input_buffer[120] = {0};
+    int input_length = 0;
+    
     Engine_InitWindow (screen_width, screen_height, "Underworld Tracker");
+
     time_t start_time = 0;
     int task_duration = 0;
     int total_seconds = task_duration * 60;
@@ -57,6 +68,15 @@ int main (void)
         Engine_DrawRectangle   (0, 0, 210, screen_height, sidebar);
 
         Engine_DrawRectangle(list.x, list.y, list.width, list.length , center);
+
+        Engine_DrawRectangle(input_box.x, input_box.y, input_box.width, input_box.length, is_typing ? clock_active : center);
+
+        Engine_DrawText(input_box.x + 10, input_box.y + 25, input_buffer, text);
+
+        if (input_length == 0 && !is_typing)
+        {
+             Engine_DrawText(input_box.x + 10, input_box.y + 25, "Click here to add a new task...", text);
+        }
 
         for (int i = 0; i < today_list->size; ++i)
         {
@@ -140,6 +160,11 @@ int main (void)
                 }
                 
             }
+
+            else if (CheckCollisionPointRec(mouse_pos, input_box))
+            {
+                is_typing = true;
+            }
             
             else if (CheckCollisionPointRec (mouse_pos, list))
             {
@@ -156,11 +181,42 @@ int main (void)
                 }
             }
 
+            else
+            {
+               is_typing = false;
+            }
+
         }
 
         int key = Engine_GetPressedKey();
-        if (key != 0)
-        printf("Key pressed: %c (ASCII: %d)\n", key, key);
+
+        if (is_typing && key != 0)
+        {
+            if (key == 8 && input_length > 0)
+            {
+                input_length--;
+                input_buffer[input_length] = '\0';
+            }
+
+            else if (key == 10 && input_length > 0)
+            {
+        
+                Task *t = create_task(input_buffer, 25, get_day_start_time(), 0);
+                append_task(today_list, t);
+                save_tasks(today_list, db_file);
+
+                input_length = 0;
+                memset(input_buffer, 0, sizeof(input_buffer));
+                is_typing = false; // Unfocus after submitting
+            }
+
+            else if (key >= 32 && key <= 126 && input_length < 119)
+            {
+               input_buffer[input_length] = (char)key;
+               input_length++;
+               input_buffer[input_length] = '\0';
+            }
+        }
 
         Engine_EndDrawing   ();
  
