@@ -78,6 +78,27 @@ int main (void)
              Engine_DrawText(input_box.x + 10, input_box.y + 25, "Click here to add a new task...", text);
         }
 
+        int box_size = 12;
+        int padding = 4;
+        int total_cols = 52;
+        int total_rows = 7;
+
+        int grid_width = total_cols * (box_size + padding);
+        int grid_height = total_rows * (box_size + padding);
+
+        int start_x = 210 + ((screen_width - 210) / 2) - (grid_width / 2);
+        int start_y = screen_height - grid_height - 60;
+
+        for (int col = 0; col < total_cols; col++)
+        {
+            for (int row = 0; row < total_rows; row++)
+            {
+                int x = start_x + col * (box_size + padding);
+                int y = start_y + row * (box_size + padding);
+                Engine_DrawRectangle(x, y, box_size, box_size, grid);
+            }
+        }
+
         for (int i = 0; i < today_list->size; ++i)
         {
             int text_y = 100 + (i * 30); 
@@ -135,7 +156,7 @@ int main (void)
         else
         Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock);
 
-        Engine_DrawRectangle   (896, 854, 692, 94, grid);
+       /* Engine_DrawRectangle   (896, 854, 692, 94, grid);
 
         for (int row = 861; row  < 945; row += 13)
         {
@@ -143,7 +164,7 @@ int main (void)
             {
                 Engine_DrawRectangle (column, row, 5, 5, square);
             }
-        }
+        } */
 
         if (Engine_IsMouseButtonPressed())
         {
@@ -207,7 +228,7 @@ int main (void)
 
                 input_length = 0;
                 memset(input_buffer, 0, sizeof(input_buffer));
-                is_typing = false; // Unfocus after submitting
+                is_typing = false;
             }
 
             else if (key >= 32 && key <= 126 && input_length < 119)
