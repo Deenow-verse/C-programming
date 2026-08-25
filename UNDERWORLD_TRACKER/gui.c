@@ -57,6 +57,11 @@ int main (void)
     const char *db_file = ".underworld.dat";
     TaskList *today_list = load_tasks(db_file);
 
+    if (today_list == NULL)
+    {
+        today_list = create_list(10);
+    }
+
     if (today_list != NULL && today_list->size > 0)
     {
         if (today_list->items[0]->scheduled_time < get_day_start_time())

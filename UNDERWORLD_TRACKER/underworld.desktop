@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Underworld Tracker
+Comment=Custom C-based Pomodoro & Task Tracker
+Exec=/home/deenow-verse/repos/C-programming/UNDERWORLD_TRACKER/gui_app
+Path=/home/deenow-verse/repos/C-programming/UNDERWORLD_TRACKER
+Icon=/home/deenow-verse/repos/C-programming/UNDERWORLD_TRACKER/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;
