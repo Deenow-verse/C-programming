@@ -45,5 +45,6 @@ bool save_tasks(TaskList *list, const char *filename);
 TaskList* load_tasks(const char *filename);
 TaskList* rollover_day(TaskList *old_list);
 int get_completed_tasks_count(const char *filename, time_t target_day);
+void delete_task(TaskList *list, int target_index);
 
 #endif

@@ -264,6 +264,14 @@ int main (void)
             {
                 switch (focused_box)
                 {
+                    case 0:
+                    if (active_task != -1)
+                    {
+                        delete_task(today_list, active_task);
+                        save_tasks(today_list, db_file);
+                        active_task = -1;
+                        is_timer_running = false;
+                    }
                     case 1:
                     if (name_len > 0)
                     {
@@ -302,7 +310,7 @@ int main (void)
                     mask = (1 << time_info->tm_wday);
                 }
 
-                else if (*rec_buffer == 'o' || *rec_buffer == 'O')
+                else if (*rec_buffer == 'd' || *rec_buffer == 'D')
                 { 
                     mask = 127; 
                 }

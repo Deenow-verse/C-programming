@@ -242,3 +242,18 @@ int get_completed_tasks_count(const char *filename, time_t target_day)
     fclose(file);
     return count;
 }
+
+void delete_task(TaskList *list, int target_index)
+{
+    if (list == NULL || target_index < 0 || target_index >= list -> size)
+    return;
+
+    free(list->items[target_index]);
+
+    for (int i = target_index; i < list->size - 1; ++i)
+    {
+        list->items[i] = list->items[i + 1];
+    }
+
+    list->size--;
+}
