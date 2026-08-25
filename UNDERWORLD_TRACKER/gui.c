@@ -11,7 +11,9 @@ int main (void)
 
     Rectangle clock_btn;
     Rectangle list;
-    Rectangle input_box = {240, 40, 600, 40};
+    Rectangle name_box = {240, 40, 400, 40};
+    Rectangle dur_box = {660, 40, 100, 40};
+    Rectangle rec_box  = {780, 40, 100, 40};
 
     list.width =screen_width - 210;
     list.length = screen_height;
@@ -25,9 +27,11 @@ int main (void)
 
     bool is_timer_running = false;
 
-    bool is_typing = false;
-    char input_buffer[120] = {0};
-    int input_length = 0;
+    int focused_box = 0;
+    char name_buffer[120] = {0};
+    char dur_buffer[16] = {0};
+    char rec_buffer[16] = {0};
+    int name_len = 0, dur_len = 0, rec_len = 0;
     
     Engine_InitWindow (screen_width, screen_height, "Underworld Tracker");
 
@@ -73,14 +77,29 @@ int main (void)
 
         Engine_DrawRectangle(list.x, list.y, list.width, list.length , center);
 
-        Engine_DrawRectangle(input_box.x, input_box.y, input_box.width, input_box.length, is_typing ? clock_active : center);
+        Engine_DrawRectangle(name_box.x, name_box.y, name_box.width, name_box.length, focused_box == 1? clock_active : center);
+        Engine_DrawText(name_box.x + 10, name_box.y + 25, name_buffer, text);
 
-        Engine_DrawText(input_box.x + 10, input_box.y + 25, input_buffer, text);
-
-        if (input_length == 0 && !is_typing)
+        if (name_len == 0 && focused_box != 1)
         {
-             Engine_DrawText(input_box.x + 10, input_box.y + 25, "Click here to add a new task...", text);
+            Engine_DrawText(name_box.x + 10, name_box.y + 25, "Click here to add the name of the new task...", text);
         }
+
+        Engine_DrawRectangle(dur_box.x, dur_box.y, dur_box.width, dur_box.length, focused_box == 2? clock_active : center);
+        Engine_DrawText(dur_box.x + 10, dur_box.y + 25, dur_buffer, text);
+
+        if (dur_len == 0 && focused_box != 2)
+        {
+            Engine_DrawText(dur_box.x + 10, dur_box.y + 25, "Mins", text);
+        }
+
+        Engine_DrawRectangle (rec_box.x, rec_box.y, rec_box.width, rec_box.length,focused_box == 3? clock_active : center);
+        Engine_DrawText(rec_box.x + 10, rec_box.y + 25, rec_buffer, text);
+
+        if (dur_len == 0 && focused_box != 2)
+        {
+            Engine_DrawText(rec_box.x + 10, rec_box.y + 25, "D/W/O", text);
+        }       
 
         int box_size = 12;
         int padding = 4;
@@ -179,16 +198,6 @@ int main (void)
         else
         Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock);
 
-       /* Engine_DrawRectangle   (896, 854, 692, 94, grid);
-
-        for (int row = 861; row  < 945; row += 13)
-        {
-            for (int column = 903; column < 1574; column += 13)
-            {
-                Engine_DrawRectangle (column, row, 5, 5, square);
-            }
-        } */
-
         if (Engine_IsMouseButtonPressed())
         {
             Vector2D mouse_pos = { (float)Engine_GetMouseX(), (float)Engine_GetMouseY() };
@@ -205,9 +214,19 @@ int main (void)
                 
             }
 
-            else if (CheckCollisionPointRec(mouse_pos, input_box))
+            else if (CheckCollisionPointRec(mouse_pos, name_box))
             {
-                is_typing = true;
+                focused_box = 1;
+            }
+            
+            else if (CheckCollisionPointRec(mouse_pos, dur_box))
+            {
+                focused_box = 2;
+            }
+
+            else if (CheckCollisionPointRec(mouse_pos, rec_box))
+            {
+                focused_box = 3;
             }
             
             else if (CheckCollisionPointRec (mouse_pos, list))
@@ -227,38 +246,102 @@ int main (void)
 
             else
             {
-               is_typing = false;
+               focused_box = 0;
             }
 
         }
 
         int key = Engine_GetPressedKey();
 
-        if (is_typing && key != 0)
+        if (focused_box != 0 && key != 0)
         {
-            if (key == 8 && input_length > 0)
+            if (key == 8)
             {
-                input_length--;
-                input_buffer[input_length] = '\0';
+                switch (focused_box)
+                {
+                    case 1:
+                    if (name_len > 0)
+                    {
+                        name_len--;
+                        name_buffer [name_len] = '\0';
+                    }
+                    break;
+
+                    case 2:
+                    if (dur_len > 0)
+                    {
+                        dur_len--;
+                        dur_buffer [dur_len] = '\0';
+                    }
+                    break;
+
+                    case 3:
+                    if (rec_len > 0)
+                    {
+                        rec_len--;
+                        rec_buffer [rec_len] = '\0';
+                    }
+                }
             }
 
-            else if (key == 10 && input_length > 0)
+            else if (key == 10)
             {
+                task_duration = atoi (dur_buffer);
+
+                uint8_t mask = 0;
+
+                if (*rec_buffer == 'w' || *rec_buffer == 'W')
+                {                   
+                    time_t now = get_day_start_time();
+                    struct tm *time_info = localtime(&now);
+                    mask = (1 << time_info->tm_wday);
+                }
+
+                else if (*rec_buffer == 'o' || *rec_buffer == 'O')
+                { 
+                    mask = 127; 
+                }
         
-                Task *t = create_task(input_buffer, 25, get_day_start_time(), 0);
+                Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
                 append_task(today_list, t);
                 save_tasks(today_list, db_file);
 
-                input_length = 0;
-                memset(input_buffer, 0, sizeof(input_buffer));
-                is_typing = false;
+                name_len = 0;
+                memset(name_buffer, 0, sizeof(name_buffer));
+
+                dur_len = 0;
+                memset(dur_buffer, 0, sizeof(dur_buffer));
+
+                rec_len = 0;
+                memset(rec_buffer, 0, sizeof(rec_buffer));
+
+                focused_box = 0;
+
             }
 
-            else if (key >= 32 && key <= 126 && input_length < 119)
+            else if (key >= 32 && key <= 126)
             {
-               input_buffer[input_length] = (char)key;
-               input_length++;
-               input_buffer[input_length] = '\0';
+                if (focused_box == 1 && name_len < 119)
+                {
+                    name_buffer [name_len] = (char)key;
+                    name_len++;
+                    name_buffer [name_len] = '\0';
+                }
+
+                else if (focused_box == 2 && dur_len < 15)
+                {
+                    dur_buffer [dur_len] = (char) key;
+                    dur_len++;
+                    dur_buffer [dur_len] = '\0';
+                }
+
+                else if (focused_box == 3 && rec_len < 15)
+                {
+                    rec_buffer [rec_len] = (char) key;
+                    rec_len++;
+                    rec_buffer [rec_len] = '\0';
+                }
+               
             }
         }
 
