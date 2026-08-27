@@ -15,6 +15,7 @@
 *.a
 *.so
 *.dll
+*.d
 
 # Do not ignore source code files 
 !*.c
