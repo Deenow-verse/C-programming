@@ -16,6 +16,8 @@
 *.so
 *.dll
 *.d
+[Bb]in/
+[Oo]bj/
 
 # Do not ignore source code files 
 !*.c
