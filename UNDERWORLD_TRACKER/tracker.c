@@ -204,14 +204,9 @@ TaskList* rollover_day(TaskList *old_list)
 
     for (size_t i = 0; i < old_list->size; i++)
     {
-        if (old_list->items[i]->recurrence_mask & (1 << new_wday))
+        if (old_list->items[i]->recurrence_mask > 0)
         {
-            Task *cloned_task = create_task(
-                old_list->items[i]->name, 
-                old_list->items[i]->target_duration, 
-                new_day_time, 
-                old_list->items[i]->recurrence_mask
-            );
+            Task *cloned_task = create_task(old_list->items[i]->name, old_list->items[i]->target_duration, new_day_time, old_list->items[i]->recurrence_mask);
             append_task(new_list, cloned_task);
         }
     }
@@ -256,4 +251,22 @@ void delete_task(TaskList *list, int target_index)
     }
 
     list->size--;
+}
+
+void update_view_cache(TaskList *master, ViewCache *cache, int current_wday)
+{
+    if (master == NULL || cache == NULL) return;
+    
+    cache->count = 0;
+    
+    for (int i = 0; i < master->size; ++i)
+    {
+        uint8_t mask = master->items[i]->recurrence_mask;
+
+        if (mask == 0 || (mask & (1 << current_wday)))
+        {
+            cache->indices[cache->count] = i;
+            cache->count++;
+        }
+    }
 }

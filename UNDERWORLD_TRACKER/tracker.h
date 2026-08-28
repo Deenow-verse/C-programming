@@ -36,6 +36,12 @@ typedef struct
     Task **items;
 } TaskList;
 
+typedef struct 
+{
+    int indices[MAX];
+    int count;
+} ViewCache;
+
 TaskList* create_list(size_t initial_capacity);
 Task* create_task(const char* name, int duration, time_t scheduled, uint8_t recurrence_mask);
 void free_list(TaskList* list);
@@ -46,5 +52,6 @@ TaskList* load_tasks(const char *filename);
 TaskList* rollover_day(TaskList *old_list);
 int get_completed_tasks_count(const char *filename, time_t target_day);
 void delete_task(TaskList *list, int target_index);
+void update_view_cache(TaskList *master, ViewCache *cache, int current_wday);
 
 #endif

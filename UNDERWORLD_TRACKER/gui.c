@@ -71,6 +71,13 @@ int main (void)
         }
     }
 
+    time_t today_midnight = get_day_start_time();
+    struct tm *time_info = localtime(&today_midnight);
+    int current_wday = time_info->tm_wday;
+
+    ViewCache view = {0};
+    update_view_cache(today_list, &view, current_wday);
+
     while (!Engine_WindowShouldClose())
     {
         
@@ -118,7 +125,6 @@ int main (void)
         int start_y = screen_height - grid_height - 60;
 
         int heatmap_scores[364] = {0};
-        time_t today_midnight = get_day_start_time();
 
         for (int i = 0; i < 364; i++)
         {
@@ -146,31 +152,30 @@ int main (void)
             }
         }
 
-        for (int i = 0; i < today_list->size; ++i)
+        for (int v = 0; v < view.count; ++v)
         {
-            int text_y = 100 + (i * 30); 
+            int actual_index = view.indices[v];
+            int text_y = 100 + (v * 30); 
 
             char duration_text[32];
-            snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[i]->target_duration);  
+            snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[actual_index]->target_duration);  
 
-            if (today_list->items[i]->completion_status == true)
+            if (today_list->items[actual_index]->completion_status == true)
             {
                 Engine_DrawText (240 + 300, text_y, duration_text, clock_active);
-                Engine_DrawText (240, text_y, today_list ->items[i]-> name, clock_active);
+                Engine_DrawText (240, text_y, today_list->items[actual_index]->name, clock_active);
             }
-            
-            else if(i == active_task)
+            else if(actual_index == active_task)
             {
                 Engine_DrawText (240 + 300, text_y, duration_text, clock);
-                Engine_DrawText (240, text_y, today_list ->items[i]-> name, clock);
+                Engine_DrawText (240, text_y, today_list->items[actual_index]->name, clock);
             }
             else
             {
                 Engine_DrawText (240 + 300, text_y, duration_text, text);              
-                Engine_DrawText (240, text_y, today_list ->items[i]-> name, text);
+                Engine_DrawText (240, text_y, today_list->items[actual_index]->name, text);
             }
-            
-        }            
+        }           
 
         if (is_timer_running)
         {
@@ -236,13 +241,13 @@ int main (void)
             
             else if (CheckCollisionPointRec (mouse_pos, list))
             {
-                int list_number;
-                list_number = (mouse_pos.y - 100) / 30;
+                int clicked_row = (mouse_pos.y - 100) / 30;
 
-                if (list_number >= 0 && list_number < today_list->size)
+                if (clicked_row >= 0 && clicked_row < view.count)
                 {
-                    task_duration = today_list -> items [list_number] -> target_duration;
-                    active_task = list_number;
+                    int actual_index = view.indices[clicked_row];
+                    task_duration = today_list->items[actual_index]->target_duration;
+                    active_task = actual_index;
                     total_seconds = task_duration * 60;
                     remaining_seconds = total_seconds;
                     is_timer_running = false;
@@ -269,6 +274,7 @@ int main (void)
                     {
                         delete_task(today_list, active_task);
                         save_tasks(today_list, db_file);
+                        update_view_cache(today_list, &view, current_wday);
                         active_task = -1;
                         is_timer_running = false;
                     }
@@ -318,6 +324,7 @@ int main (void)
                 Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
                 append_task(today_list, t);
                 save_tasks(today_list, db_file);
+                update_view_cache(today_list, &view, current_wday);
 
                 name_len = 0;
                 memset(name_buffer, 0, sizeof(name_buffer));
