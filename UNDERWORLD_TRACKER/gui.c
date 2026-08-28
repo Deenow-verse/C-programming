@@ -40,6 +40,7 @@ int main (void)
     int total_seconds = task_duration * 60;
     int remaining_seconds = total_seconds;
     int active_task = -1;
+    bool is_edit_mode = false;
     
     RGBA_Colour bg = {255, 255, 255, 255};
     RGBA_Colour center = {198, 228, 255, 255};
@@ -320,9 +321,22 @@ int main (void)
                 { 
                     mask = 127; 
                 }
-        
-                Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
-                append_task(today_list, t);
+
+                if (is_edit_mode && active_task != -1)
+                {
+                    strncpy(today_list->items[active_task]->name, name_buffer, 119);
+                    today_list->items[active_task]->target_duration = task_duration;
+                    today_list->items[active_task]->recurrence_mask = mask;
+                    
+                    is_edit_mode = false;
+                }
+
+                else
+                {
+                    Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
+                    append_task(today_list, t);
+                }
+                
                 save_tasks(today_list, db_file);
                 update_view_cache(today_list, &view, current_wday);
 
@@ -364,6 +378,32 @@ int main (void)
                
             }
         }
+
+        else if (focused_box == 0 && (key == 69 || key == 101))
+            {
+                if (active_task != -1)
+                {
+                    is_edit_mode = true;
+
+                    strncpy(name_buffer, today_list->items[active_task]->name, 119);
+                    name_len = strlen(name_buffer);
+
+                    snprintf(dur_buffer, sizeof(dur_buffer), "%d", today_list->items[active_task]->target_duration);
+                    dur_len = strlen(dur_buffer);
+
+                    uint8_t mask = today_list->items[active_task]->recurrence_mask;
+                    if (mask == 127) {
+                        strncpy(rec_buffer, "D", 2);
+                    } else if (mask > 0) {
+                        strncpy(rec_buffer, "W", 2);
+                    } else {
+                        strncpy(rec_buffer, "O", 2);
+                    }
+                    rec_len = 1;
+
+                    focused_box = 1; 
+                }
+            }
 
         Engine_EndDrawing   ();
  
