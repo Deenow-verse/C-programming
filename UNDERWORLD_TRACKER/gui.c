@@ -79,6 +79,16 @@ int main (void)
     ViewCache view = {0};
     update_view_cache(today_list, &view, current_wday);
 
+
+
+    int heatmap_scores[364] = {0};
+
+    for (int i = 0; i < 364; i++)
+    {
+        time_t target = today_midnight - ((363 - i) * 86400);
+        heatmap_scores[i] = get_completed_tasks_count(db_file, target);
+    }
+
     while (!Engine_WindowShouldClose())
     {
         
@@ -124,14 +134,6 @@ int main (void)
 
         int start_x = 210 + ((screen_width - 210) / 2) - (grid_width / 2);
         int start_y = screen_height - grid_height - 60;
-
-        int heatmap_scores[364] = {0};
-
-        for (int i = 0; i < 364; i++)
-        {
-            time_t target = today_midnight - ((363 - i) * 86400);
-            heatmap_scores[i] = get_completed_tasks_count(db_file, target);
-        }
 
         for (int col = 0; col < total_cols; col++)
         {
@@ -264,124 +266,20 @@ int main (void)
 
         int key = Engine_GetPressedKey();
 
-        if (focused_box != 0 && key != 0)
+        if (key != 0)
         {
-            if (key == 8)
+            if (focused_box == 0 && active_task != -1 )
             {
-                switch (focused_box)
+                if (key == 8) 
                 {
-                    case 0:
-                    if (active_task != -1)
-                    {
-                        delete_task(today_list, active_task);
-                        save_tasks(today_list, db_file);
-                        update_view_cache(today_list, &view, current_wday);
-                        active_task = -1;
-                        is_timer_running = false;
-                    }
-                    case 1:
-                    if (name_len > 0)
-                    {
-                        name_len--;
-                        name_buffer [name_len] = '\0';
-                    }
-                    break;
-
-                    case 2:
-                    if (dur_len > 0)
-                    {
-                        dur_len--;
-                        dur_buffer [dur_len] = '\0';
-                    }
-                    break;
-
-                    case 3:
-                    if (rec_len > 0)
-                    {
-                        rec_len--;
-                        rec_buffer [rec_len] = '\0';
-                    }
-                }
-            }
-
-            else if (key == 10)
-            {
-                task_duration = atoi (dur_buffer);
-
-                uint8_t mask = 0;
-
-                if (*rec_buffer == 'w' || *rec_buffer == 'W')
-                {                   
-                    time_t now = get_day_start_time();
-                    struct tm *time_info = localtime(&now);
-                    mask = (1 << time_info->tm_wday);
+                    delete_task(today_list, active_task);
+                    save_tasks(today_list, db_file);
+                    update_view_cache(today_list, &view, current_wday);
+                    active_task = -1;
+                    is_timer_running = false;
                 }
 
-                else if (*rec_buffer == 'd' || *rec_buffer == 'D')
-                { 
-                    mask = 127; 
-                }
-
-                if (is_edit_mode && active_task != -1)
-                {
-                    strncpy(today_list->items[active_task]->name, name_buffer, 119);
-                    today_list->items[active_task]->target_duration = task_duration;
-                    today_list->items[active_task]->recurrence_mask = mask;
-                    
-                    is_edit_mode = false;
-                }
-
-                else
-                {
-                    Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
-                    append_task(today_list, t);
-                }
-                
-                save_tasks(today_list, db_file);
-                update_view_cache(today_list, &view, current_wday);
-
-                name_len = 0;
-                memset(name_buffer, 0, sizeof(name_buffer));
-
-                dur_len = 0;
-                memset(dur_buffer, 0, sizeof(dur_buffer));
-
-                rec_len = 0;
-                memset(rec_buffer, 0, sizeof(rec_buffer));
-
-                focused_box = 0;
-
-            }
-
-            else if (key >= 32 && key <= 126)
-            {
-                if (focused_box == 1 && name_len < 119)
-                {
-                    name_buffer [name_len] = (char)key;
-                    name_len++;
-                    name_buffer [name_len] = '\0';
-                }
-
-                else if (focused_box == 2 && dur_len < 15)
-                {
-                    dur_buffer [dur_len] = (char) key;
-                    dur_len++;
-                    dur_buffer [dur_len] = '\0';
-                }
-
-                else if (focused_box == 3 && rec_len < 15)
-                {
-                    rec_buffer [rec_len] = (char) key;
-                    rec_len++;
-                    rec_buffer [rec_len] = '\0';
-                }
-               
-            }
-        }
-
-        else if (focused_box == 0 && (key == 69 || key == 101))
-            {
-                if (active_task != -1)
+                else if (key == 69 || key == 101)
                 {
                     is_edit_mode = true;
 
@@ -392,19 +290,129 @@ int main (void)
                     dur_len = strlen(dur_buffer);
 
                     uint8_t mask = today_list->items[active_task]->recurrence_mask;
-                    if (mask == 127) {
+                    if (mask == 127) 
+                    {
                         strncpy(rec_buffer, "D", 2);
-                    } else if (mask > 0) {
+                    } 
+                    else if (mask > 0) 
+                    {
                         strncpy(rec_buffer, "W", 2);
-                    } else {
+                    }
+                    else 
+                    {
                         strncpy(rec_buffer, "O", 2);
                     }
                     rec_len = 1;
 
-                    focused_box = 1; 
+                    focused_box = 1;
                 }
             }
+             
+            else if (focused_box != 0 )
+            {
+                if (key == 8)
+                {
+                    switch (focused_box)
+                    {
+                        case 1:
+                        if (name_len > 0)
+                        {
+                            name_len--;
+                            name_buffer [name_len] = '\0';
+                        }
+                        break;
 
+                        case 2:
+                        if (dur_len > 0)
+                        {
+                            dur_len--;
+                            dur_buffer [dur_len] = '\0';
+                        }
+                        break;
+
+                        case 3:
+                        if (rec_len > 0)
+                        {
+                           rec_len--;
+                           rec_buffer [rec_len] = '\0';
+                        }
+                    }
+                }
+
+                else if (key == 10)
+                {
+                    task_duration = atoi (dur_buffer);
+
+                    uint8_t mask = 0;
+
+                    if (*rec_buffer == 'w' || *rec_buffer == 'W')
+                    {
+                        mask = (1 << time_info->tm_wday);
+                    }
+
+                    else if (*rec_buffer == 'd' || *rec_buffer == 'D')
+                    { 
+                       mask = 127; 
+                    }
+
+                    if (is_edit_mode && active_task != -1)
+                    {
+                        strncpy(today_list->items[active_task]->name, name_buffer, 119);
+                        today_list->items[active_task]->target_duration = task_duration;
+                        today_list->items[active_task]->recurrence_mask = mask;
+                    
+                        is_edit_mode = false;
+                    }
+
+                    else
+                    {
+                        Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
+                        append_task(today_list, t);
+                    }
+
+                    save_tasks(today_list, db_file);
+                    update_view_cache(today_list, &view, current_wday);
+
+                    name_len = 0;
+                    memset(name_buffer, 0, sizeof(name_buffer));
+
+                    dur_len = 0;
+                    memset(dur_buffer, 0, sizeof(dur_buffer));
+
+                    rec_len = 0;
+                    memset(rec_buffer, 0, sizeof(rec_buffer));
+
+                    focused_box = 0;
+
+                }
+
+                else if (key >= 32 && key <= 126)
+                {
+                    if (focused_box == 1 && name_len < 119)
+                    {
+                        name_buffer [name_len] = (char)key;
+                        name_len++;
+                        name_buffer [name_len] = '\0';
+                    }
+
+                    else if (focused_box == 2 && dur_len < 15)
+                    {
+                        dur_buffer [dur_len] = (char) key;
+                        dur_len++;
+                        dur_buffer [dur_len] = '\0';
+                    }
+
+                    else if (focused_box == 3 && rec_len < 15)
+                    {
+                        rec_buffer [rec_len] = (char) key;
+                        rec_len++;
+                        rec_buffer [rec_len] = '\0';
+                    }
+               
+                }
+            }        
+        }
+        
         Engine_EndDrawing   ();
  
         usleep(target_time_per_frame);  
