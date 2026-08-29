@@ -270,3 +270,26 @@ void update_view_cache(TaskList *master, ViewCache *cache, int current_wday)
         }
     }
 }
+
+time_t calculate_scheduled_time(time_t logical_day_start, const char *time_str)
+{
+    int hours = 0, mins = 0;
+
+    if (sscanf(time_str, "%d:%d", &hours, &mins) != 2)
+    {
+        return logical_day_start; 
+    }
+
+    struct tm *time_info = localtime(&logical_day_start);
+    
+    time_info->tm_hour = hours;
+    time_info->tm_min = mins;
+    time_info->tm_sec = 0;
+
+    if (hours < 16)
+    {
+        time_info->tm_mday += 1;
+    }
+
+    return mktime(time_info);
+}
