@@ -11,9 +11,10 @@ int main (void)
 
     Rectangle clock_btn;
     Rectangle list;
-    Rectangle name_box = {240, 40, 400, 40};
-    Rectangle dur_box = {660, 40, 100, 40};
-    Rectangle rec_box  = {780, 40, 100, 40};
+    Rectangle name_box = {240, 40, 300, 40};
+    Rectangle time_box = {560, 40, 100, 40};
+    Rectangle dur_box  = {680, 40, 100, 40};
+    Rectangle rec_box  = {800, 40, 100, 40};
 
     list.width =screen_width - 210;
     list.length = screen_height;
@@ -29,6 +30,7 @@ int main (void)
 
     int focused_box = 0;
     char name_buffer[120] = {0};
+    char time_buffer[16] = {0};
     char dur_buffer[16] = {0};
     char rec_buffer[16] = {0};
     int name_len = 0, dur_len = 0, rec_len = 0;
@@ -37,6 +39,7 @@ int main (void)
 
     time_t start_time = 0;
     int task_duration = 0;
+    int time_len = 0;
     int total_seconds = task_duration * 60;
     int remaining_seconds = total_seconds;
     int active_task = -1;
@@ -108,6 +111,13 @@ int main (void)
             Engine_DrawText(name_box.x + 10, name_box.y + 25, "Click here to add the name of the new task...", text);
         }
 
+        Engine_DrawRectangle(time_box.x, time_box.y, time_box.width, time_box.length, focused_box == 4? clock_active : center);
+        Engine_DrawText(time_box.x + 10, time_box.y + 25, time_buffer, text);
+
+        if (time_len == 0 && focused_box != 4) {
+            Engine_DrawText(time_box.x + 10, time_box.y + 25, "HH:MM", text);
+        }
+
         Engine_DrawRectangle(dur_box.x, dur_box.y, dur_box.width, dur_box.length, focused_box == 2? clock_active : center);
         Engine_DrawText(dur_box.x + 10, dur_box.y + 25, dur_buffer, text);
 
@@ -162,6 +172,12 @@ int main (void)
 
             char duration_text[32];
             snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[actual_index]->target_duration);  
+
+            char sched_time_text[16];
+            struct tm *sched_info = localtime(&today_list->items[actual_index]->scheduled_time);
+            strftime(sched_time_text, sizeof(sched_time_text), "%H:%M", sched_info);
+
+            RGBA_Colour current_color = text;
 
             if (today_list->items[actual_index]->completion_status == true)
             {
@@ -231,6 +247,11 @@ int main (void)
             {
                 focused_box = 1;
             }
+
+            else if (CheckCollisionPointRec(mouse_pos, time_box))
+            {
+                focused_box = 4;
+            }
             
             else if (CheckCollisionPointRec(mouse_pos, dur_box))
             {
@@ -286,6 +307,10 @@ int main (void)
                     strncpy(name_buffer, today_list->items[active_task]->name, 119);
                     name_len = strlen(name_buffer);
 
+                    struct tm *edit_time_info = localtime(&today_list->items[active_task]->scheduled_time);
+                    strftime(time_buffer, sizeof(time_buffer), "%H:%M", edit_time_info);
+                    time_len = strlen(time_buffer);
+
                     snprintf(dur_buffer, sizeof(dur_buffer), "%d", today_list->items[active_task]->target_duration);
                     dur_len = strlen(dur_buffer);
 
@@ -336,6 +361,15 @@ int main (void)
                            rec_len--;
                            rec_buffer [rec_len] = '\0';
                         }
+                        break;
+
+                        case 4:
+                        if (time_len > 0)
+                        {
+                            time_buffer [--time_len] = '\0';
+                        }
+                        break;
+
                     }
                 }
 
@@ -355,9 +389,12 @@ int main (void)
                        mask = 127; 
                     }
 
+                    time_t exact_time = calculate_scheduled_time(get_day_start_time(), time_buffer);
+
                     if (is_edit_mode && active_task != -1)
                     {
                         strncpy(today_list->items[active_task]->name, name_buffer, 119);
+                        today_list->items[active_task]->scheduled_time = exact_time;
                         today_list->items[active_task]->target_duration = task_duration;
                         today_list->items[active_task]->recurrence_mask = mask;
                     
@@ -366,7 +403,7 @@ int main (void)
 
                     else
                     {
-                        Task *t = create_task(name_buffer, task_duration, get_day_start_time(), mask);
+                        Task *t = create_task(name_buffer, task_duration, exact_time, mask);
                         append_task(today_list, t);
                     }
 
@@ -375,6 +412,9 @@ int main (void)
 
                     name_len = 0;
                     memset(name_buffer, 0, sizeof(name_buffer));
+
+                    time_len = 0; 
+                    memset(time_buffer, 0, sizeof(time_buffer));
 
                     dur_len = 0;
                     memset(dur_buffer, 0, sizeof(dur_buffer));
@@ -407,6 +447,12 @@ int main (void)
                         rec_buffer [rec_len] = (char) key;
                         rec_len++;
                         rec_buffer [rec_len] = '\0';
+                    }
+
+                    else if (focused_box == 4 && time_len < 15)
+                    {
+                        time_buffer[time_len++] = (char)key; 
+                        time_buffer[time_len] = '\0';
                     }
                
                 }
