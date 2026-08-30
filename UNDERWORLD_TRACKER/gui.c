@@ -145,6 +145,11 @@ int main (void)
         int start_x = 210 + ((screen_width - 210) / 2) - (grid_width / 2);
         int start_y = screen_height - grid_height - 60;
 
+        bool render_tooltip = false;
+        char tooltip_date[32] = {0};
+        Vector2D tooltip_pos = {0};
+        Vector2D mouse_pos = { (float)Engine_GetMouseX(), (float)Engine_GetMouseY() };
+
         for (int col = 0; col < total_cols; col++)
         {
             for (int row = 0; row < total_rows; row++)
@@ -162,7 +167,22 @@ int main (void)
                 if (score > 15) cell_color = high_activity;
                 
                 Engine_DrawRectangle(x, y, box_size, box_size, cell_color);
+
+                if (mouse_pos.x >= x && mouse_pos.x <= (x + box_size) && mouse_pos.y >= y && mouse_pos.y <= (y + box_size))
+                {
+                    render_tooltip = true;
+
+                    time_t hover_target = today_midnight - ((363 - day_index) * 86400);
+                    struct tm *hover_info = localtime(&hover_target);
+
+                    strftime(tooltip_date, sizeof(tooltip_date), "%b %d, %Y", hover_info);
+                }
             }
+        }
+
+        if (render_tooltip)
+        {
+            Engine_DrawText(start_x, start_y - 30, tooltip_date, text);
         }
 
         for (int v = 0; v < view.count; ++v)
@@ -180,20 +200,13 @@ int main (void)
             RGBA_Colour current_color = text;
 
             if (today_list->items[actual_index]->completion_status == true)
-            {
-                Engine_DrawText (240 + 300, text_y, duration_text, clock_active);
-                Engine_DrawText (240, text_y, today_list->items[actual_index]->name, clock_active);
-            }
+            current_color = clock_active;
             else if(actual_index == active_task)
-            {
-                Engine_DrawText (240 + 300, text_y, duration_text, clock);
-                Engine_DrawText (240, text_y, today_list->items[actual_index]->name, clock);
-            }
-            else
-            {
-                Engine_DrawText (240 + 300, text_y, duration_text, text);              
-                Engine_DrawText (240, text_y, today_list->items[actual_index]->name, text);
-            }
+            current_color = clock;
+
+            Engine_DrawText (name_box.x, text_y, today_list->items[actual_index]->name, current_color);
+            Engine_DrawText (time_box.x, text_y, sched_time_text, current_color); 
+            Engine_DrawText (dur_box.x,  text_y, duration_text, current_color);
         }           
 
         if (is_timer_running)
