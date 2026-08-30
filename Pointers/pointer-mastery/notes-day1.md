@@ -47,6 +47,31 @@ p = &i;      // p now holds the address of i
 
 Important rule: the pointer and the variable whose address you take must be of the same type.
 
-### Experiments done
+### Experiment done
 
 - `pointer_declaration_and_assignment.c` → declaring a pointer and assigning it
+
+## 1.3 Dereferencing
+
+When you have a pointer that holds the address of a variable, you can access or change that variable through the pointer. This is called **dereferencing**.
+
+The operator is `*` (same symbol as in the declaration, but different meaning here).  
+It is also called the **indirection operator**.
+
+`*p` means “go to the address stored in `p` and use the value that lives there”.
+
+You can use the dereferenced pointer exactly like the original variable:
+
+```c
+int i;
+int *p = &i;
+
+i = 10;
+*p = 20;          // this changes i to 20
+
+printf("%d\n", i);   // prints 20
+printf("%d\n", *p);  // also prints 20
+
+### Experiment done
+
+- `dereferrencing.c` → accessing the value of a variable and changing its value through its pointer
