@@ -217,6 +217,21 @@ TaskList* rollover_day(TaskList *old_list)
 
 int get_completed_tasks_count(const char *filename, time_t target_day)
 {
+    FILE *f_hist = fopen(".underworld_history.dat", "rb");
+    if (f_hist)
+    {
+        DailySummary summary;
+        while (fread(&summary, sizeof(DailySummary), 1, f_hist) == 1)
+        {
+            if (summary.now == target_day)
+            {
+                fclose(f_hist);
+                return summary.completed_tasks;
+            }
+        }
+        fclose(f_hist);
+    }
+
     FILE *file = fopen(filename, "rb");
     if (file == NULL)
     {
