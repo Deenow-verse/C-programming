@@ -37,7 +37,7 @@ int main (void)
     
     Engine_InitWindow (screen_width, screen_height, "Underworld Tracker");
 
-    time_t start_time = 0;
+    time_t timer_segment_start = 0;
     int task_duration = 0;
     int time_len = 0;
     int total_seconds = task_duration * 60;
@@ -146,7 +146,7 @@ int main (void)
         int start_y = screen_height - grid_height - 60;
 
         bool render_tooltip = false;
-        char tooltip_date[32] = {0};
+        char tooltip_text[64] = {0};
         Vector2D tooltip_pos = {0};
         Vector2D mouse_pos = { (float)Engine_GetMouseX(), (float)Engine_GetMouseY() };
 
@@ -171,18 +171,31 @@ int main (void)
                 if (mouse_pos.x >= x && mouse_pos.x <= (x + box_size) && mouse_pos.y >= y && mouse_pos.y <= (y + box_size))
                 {
                     render_tooltip = true;
+                    tooltip_pos = mouse_pos;
 
                     time_t hover_target = today_midnight - ((363 - day_index) * 86400);
                     struct tm *hover_info = localtime(&hover_target);
+                    char date_str[32];
 
-                    strftime(tooltip_date, sizeof(tooltip_date), "%b %d, %Y", hover_info);
+                    strftime(date_str, sizeof(date_str), "%b %d, %Y", hover_info);
+
+                    if (score == 1)
+                        snprintf(tooltip_text, sizeof(tooltip_text), "1 task on %s", date_str);
+                    else
+                        snprintf(tooltip_text, sizeof(tooltip_text), "%d tasks on %s", score, date_str);
                 }
             }
         }
 
         if (render_tooltip)
         {
-            Engine_DrawText(start_x, start_y - 30, tooltip_date, text);
+           int tip_width = 180;
+            int tip_height = 26;
+            int tip_x = tooltip_pos.x - (tip_width / 2);
+            int tip_y = tooltip_pos.y - tip_height - 8;
+
+            Engine_DrawRectangle(tip_x, tip_y, tip_width, tip_height, text);
+            Engine_DrawText(tip_x + 8, tip_y + 18, tooltip_text, bg);
         }
 
         for (int v = 0; v < view.count; ++v)
@@ -207,38 +220,55 @@ int main (void)
             Engine_DrawText (name_box.x, text_y, today_list->items[actual_index]->name, current_color);
             Engine_DrawText (time_box.x, text_y, sched_time_text, current_color); 
             Engine_DrawText (dur_box.x,  text_y, duration_text, current_color);
-        }           
+        }       
+        
+        int current_display_seconds = remaining_seconds;
 
         if (is_timer_running)
         {
-            Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock_active);
             time_t now = time(NULL);
-            double elapsed = difftime(now, start_time);
-            remaining_seconds = total_seconds - (int)elapsed;
+            int elapsed = difftime(now, timer_segment_start);
+            current_display_seconds = remaining_seconds - elapsed;
 
-            if (remaining_seconds <= 0)
+            if (current_display_seconds <= 0)
             {
-                is_timer_running = false; 
-                remaining_seconds = total_seconds;  
+                current_display_seconds = 0;
+                is_timer_running = false;
+                remaining_seconds = 0; 
                 
                 if (active_task != -1)
                 {
                     today_list->items[active_task]->completion_status = true;
                     save_tasks(today_list, db_file);
+                    update_view_cache(today_list, &view, current_wday);
+                    
+                    heatmap_scores[363] = get_completed_tasks_count(db_file, today_midnight);
                 }
             }
-            else
-            {
+        }
+
+        if (is_timer_running)
+        {
+            Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock_active);
+            int mins = current_display_seconds / 60;
+            int secs = current_display_seconds % 60;
+            char timer_text[16];
+            snprintf(timer_text, sizeof(timer_text), "%02d:%02d", mins, secs);
+            Engine_DrawText(clock_btn.x + 23, clock_btn.y + 45, timer_text, text);
+        }
+           
+        else
+        {
+           Engine_DrawRectangle(clock_btn.x, clock_btn.y, clock_btn.width, clock_btn.length, clock);
+           if (remaining_seconds > 0)
+           {
                 int mins = remaining_seconds / 60;
                 int secs = remaining_seconds % 60;
-                
                 char timer_text[16];
                 snprintf(timer_text, sizeof(timer_text), "%02d:%02d", mins, secs);
-                Engine_DrawText (clock_btn.x + 23, clock_btn.y + 45, timer_text, text);
-            }
+                Engine_DrawText(clock_btn.x + 23, clock_btn.y + 45, timer_text, text);
+           }
         }
-        else
-        Engine_DrawRectangle   (clock_btn.x, clock_btn.y , clock_btn.width, clock_btn.length, clock);
 
         if (Engine_IsMouseButtonPressed())
         {
@@ -246,12 +276,21 @@ int main (void)
 
             if (CheckCollisionPointRec(mouse_pos, clock_btn))
             {
-                if (total_seconds > 0)
-                {
-                    is_timer_running = !is_timer_running;
-                    
-                    if (is_timer_running)
-                    start_time = time(NULL);
+                if (remaining_seconds > 0 || total_seconds > 0)
+                {if (is_timer_running)
+                    {
+                        time_t now = time(NULL);
+                        int elapsed = (int)difftime(now, timer_segment_start);
+                        remaining_seconds -= elapsed;
+                        if (remaining_seconds < 0) remaining_seconds = 0;
+                        is_timer_running = false;
+                    }
+                    else
+                    {
+                        if (remaining_seconds <= 0) remaining_seconds = total_seconds;
+                        timer_segment_start = time(NULL);
+                        is_timer_running = true;
+                    }
                 }
                 
             }
@@ -311,6 +350,7 @@ int main (void)
                     update_view_cache(today_list, &view, current_wday);
                     active_task = -1;
                     is_timer_running = false;
+                    remaining_seconds = 0;
                 }
 
                 else if (key == 69 || key == 101)
