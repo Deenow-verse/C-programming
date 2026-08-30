@@ -341,6 +341,25 @@ int main (void)
 
         if (key != 0)
         {
+            if (key == 27)
+            {
+                if (focused_box != 0)
+                {
+                    focused_box = 0;
+                    is_edit_mode = false;
+                    name_len = 0; memset(name_buffer, 0, sizeof(name_buffer));
+                    time_len = 0; memset(time_buffer, 0, sizeof(time_buffer));
+                    dur_len = 0;  memset(dur_buffer, 0, sizeof(dur_buffer));
+                    rec_len = 0;  memset(rec_buffer, 0, sizeof(rec_buffer));
+                }
+
+                else if (active_task != -1)
+                {
+                    is_timer_running = false;
+                    remaining_seconds = 0;
+                    active_task = -1;
+                }
+            }
             if (focused_box == 0 && active_task != -1 )
             {
                 if (key == 8) 
