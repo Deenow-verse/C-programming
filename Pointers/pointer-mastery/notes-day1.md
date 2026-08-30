@@ -31,3 +31,22 @@ To print a pointer → use `%p` and cast to `(void *)`.
 ### Experiments done
 - `print-pointer.c` → prints value + address of an `int`
 - `data-type_system-mem_alocated.c` → prints `sizeof` for all common types
+
+## 1.2 Pointer Types
+
+To declare a pointer, write the type, then an asterisk, then the variable name:
+
+```c
+int *p;          // p is a pointer to int
+The asterisk tells the compiler that this variable will hold an address, not a normal value.
+To store an address in a pointer you use the address-of operator &:
+
+int i = 10;
+int *p;
+p = &i;      // p now holds the address of i
+
+Important rule: the pointer and the variable whose address you take must be of the same type.
+
+### Experiments done
+
+- `pointer_declaration_and_assignment.c` → declaring a pointer and assigning it
