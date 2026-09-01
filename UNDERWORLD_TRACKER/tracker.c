@@ -197,8 +197,6 @@ TaskList* rollover_day(TaskList *old_list)
     }
 
     time_t new_day_time = get_day_start_time();
-    struct tm *new_day_info = localtime(&new_day_time);
-    int new_wday = new_day_info->tm_wday;
 
     TaskList *new_list = create_list(10);
 
@@ -206,7 +204,26 @@ TaskList* rollover_day(TaskList *old_list)
     {
         if (old_list->items[i]->recurrence_mask > 0)
         {
-            Task *cloned_task = create_task(old_list->items[i]->name, old_list->items[i]->target_duration, new_day_time, old_list->items[i]->recurrence_mask);
+            struct tm *old_time_info = localtime(&old_list->items[i]->scheduled_time);
+            int old_hour = old_time_info->tm_hour;
+            int old_min  = old_time_info->tm_min;
+
+            struct tm *new_task_info = localtime(&new_day_time);
+
+            new_task_info->tm_hour = old_hour;
+            new_task_info->tm_min  = old_min;
+            new_task_info->tm_sec  = 0;
+
+            if (old_hour < 16)
+            {
+                new_task_info->tm_mday += 1;
+            }
+
+            time_t cloned_time = mktime(new_task_info);
+
+
+
+            Task *cloned_task = create_task(old_list->items[i]->name, old_list->items[i]->target_duration, cloned_time, old_list->items[i]->recurrence_mask);
             append_task(new_list, cloned_task);
         }
     }
