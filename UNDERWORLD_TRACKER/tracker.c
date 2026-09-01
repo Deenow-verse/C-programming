@@ -325,3 +325,21 @@ time_t calculate_scheduled_time(time_t logical_day_start, const char *time_str)
 
     return mktime(time_info);
 }
+
+static int compare_tasks(const void *a, const void *b)
+{
+    Task *task_a = *(Task **)a;
+    Task *task_b = *(Task **)b;
+
+    if (task_a->scheduled_time < task_b->scheduled_time) return -1;
+    if (task_a->scheduled_time > task_b->scheduled_time) return 1;
+    
+    return 0;
+}
+
+void sort_tasks(TaskList *list)
+{
+    if (list == NULL || list->size < 2) return;
+
+    qsort(list->items, list->size, sizeof(Task *), compare_tasks);
+}

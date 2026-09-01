@@ -478,6 +478,8 @@ int main (void)
                         Task *t = create_task(name_buffer, task_duration, exact_time, mask);
                         append_task(today_list, t);
                     }
+                    
+                    sort_tasks(today_list);
 
                     save_tasks(today_list, db_file);
                     update_view_cache(today_list, &view, current_wday);

@@ -54,5 +54,6 @@ int get_completed_tasks_count(const char *filename, time_t target_day);
 void delete_task(TaskList *list, int target_index);
 void update_view_cache(TaskList *master, ViewCache *cache, int current_wday);
 time_t calculate_scheduled_time(time_t logical_day_start, const char *time_str);
+void sort_tasks(TaskList *list);
 
 #endif
