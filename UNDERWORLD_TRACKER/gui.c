@@ -221,7 +221,7 @@ int main (void)
 
         if (render_tooltip)
         {
-            int tip_width = (int)(win_w * 0.09f);
+            int tip_width = (int)(win_w * 0.14f);
             int tip_height = (int)(win_h * 0.025f);
             int tip_x = tooltip_pos.x - (tip_width / 2);
             int tip_y = tooltip_pos.y - tip_height - 8;

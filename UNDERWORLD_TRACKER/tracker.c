@@ -175,7 +175,18 @@ TaskList* rollover_day(TaskList *old_list)
 
     if (old_list->size > 0)
     {
-        summary.now = old_list->items[0]->scheduled_time;
+        struct tm old_day_tm = *localtime(&old_list->items[0]->scheduled_time);
+
+        if (old_day_tm.tm_hour < 16) 
+        {
+            old_day_tm.tm_mday -= 1;
+        }
+        old_day_tm.tm_hour = 16;
+        old_day_tm.tm_min = 0;
+        old_day_tm.tm_sec = 0;
+        old_day_tm.tm_isdst = -1;
+
+        summary.now = mktime(&old_day_tm);
         summary.total_task = old_list->size;
 
         for (size_t i = 0; i < old_list->size; i++)
@@ -204,24 +215,20 @@ TaskList* rollover_day(TaskList *old_list)
     {
         if (old_list->items[i]->recurrence_mask > 0)
         {
-            struct tm *old_time_info = localtime(&old_list->items[i]->scheduled_time);
-            int old_hour = old_time_info->tm_hour;
-            int old_min  = old_time_info->tm_min;
+            struct tm old_time_info = *localtime(&old_list->items[i]->scheduled_time);
+            struct tm new_task_info = *localtime(&new_day_time);
 
-            struct tm *new_task_info = localtime(&new_day_time);
+            new_task_info.tm_hour = old_time_info.tm_hour;
+            new_task_info.tm_min  = old_time_info.tm_min;
+            new_task_info.tm_sec  = 0;
+            new_task_info.tm_isdst = -1;
 
-            new_task_info->tm_hour = old_hour;
-            new_task_info->tm_min  = old_min;
-            new_task_info->tm_sec  = 0;
-
-            if (old_hour < 16)
+            if (old_time_info.tm_hour < 16)
             {
-                new_task_info->tm_mday += 1;
+                new_task_info.tm_mday += 1;
             }
 
-            time_t cloned_time = mktime(new_task_info);
-
-
+            time_t cloned_time = mktime(&new_task_info);
 
             Task *cloned_task = create_task(old_list->items[i]->name, old_list->items[i]->target_duration, cloned_time, old_list->items[i]->recurrence_mask);
             append_task(new_list, cloned_task);
@@ -229,6 +236,9 @@ TaskList* rollover_day(TaskList *old_list)
     }
 
     free_list(old_list);
+
+    sort_tasks(new_list);
+
     return new_list;
 }
 
@@ -260,7 +270,7 @@ int get_completed_tasks_count(const char *filename, time_t target_day)
 
     while (fread(&temp_task, sizeof(Task), 1, file) == 1)
     {
-        if (temp_task.completion_status == true && temp_task.scheduled_time == target_day)
+        if (temp_task.completion_status == true && temp_task.scheduled_time >= target_day && temp_task.scheduled_time < (target_day + 86400))
         {
             count++;
         }
@@ -312,18 +322,19 @@ time_t calculate_scheduled_time(time_t logical_day_start, const char *time_str)
         return logical_day_start; 
     }
 
-    struct tm *time_info = localtime(&logical_day_start);
+    struct tm time_info = *localtime(&logical_day_start);
     
-    time_info->tm_hour = hours;
-    time_info->tm_min = mins;
-    time_info->tm_sec = 0;
+    time_info.tm_hour = hours;
+    time_info.tm_min = mins;
+    time_info.tm_sec = 0;
+    time_info.tm_isdst = -1;
 
     if (hours < 16)
     {
-        time_info->tm_mday += 1;
+        time_info.tm_mday += 1;
     }
 
-    return mktime(time_info);
+    return mktime(&time_info);
 }
 
 static int compare_tasks(const void *a, const void *b)
