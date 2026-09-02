@@ -22,9 +22,33 @@ bool mouse_pressed = false;
 
 int last_key_pressed = 0;
 
+double current_font_size = 12.0;
+
 unsigned long _ColorToX11Pixel(RGBA_Colour c)
 {
     return (c.r << 16) | (c.g << 8) | c.b;
+}
+
+int Engine_GetScreenWidth(void)
+{
+    Display* temp_display = XOpenDisplay(NULL);
+    if (!temp_display) return 1920; 
+    
+    int width = DisplayWidth(temp_display, DefaultScreen(temp_display));
+    XCloseDisplay(temp_display);
+    
+    return width;
+}
+
+int Engine_GetScreenHeight(void)
+{
+    Display* temp_display = XOpenDisplay(NULL);
+    if (!temp_display) return 1080; 
+    
+    int height = DisplayHeight(temp_display, DefaultScreen(temp_display));
+    XCloseDisplay(temp_display);
+    
+    return height;
 }
 
 void Engine_InitWindow(int width, int height, const char* title)
@@ -167,18 +191,14 @@ void Engine_BeginDrawing(void)
 
 void Engine_EndDrawing(void)
 {
-    XWindowAttributes wa;
-    XGetWindowAttributes(display, window, &wa);
-    XCopyArea(display, back_buffer, window, gc, 0, 0, wa.width, wa.height, 0, 0);
+    XCopyArea(display, back_buffer, window, gc, 0, 0, current_width, current_height, 0, 0);
     XFlush(display);
 }
 
 void Engine_ClearBackground(RGBA_Colour color)
 {
     XSetForeground(display, gc, _ColorToX11Pixel(color));
-    XWindowAttributes wa;
-    XGetWindowAttributes(display, window, &wa);
-    XFillRectangle(display, back_buffer, gc, 0, 0, wa.width, wa.height);
+    XFillRectangle(display, back_buffer, gc, 0, 0, current_width, current_height);
 }
 
 void Engine_DrawRectangle(int x, int y, int width, int height, RGBA_Colour color)
@@ -220,4 +240,26 @@ void Engine_DrawText(int x, int y, const char* text, RGBA_Colour color)
 int Engine_GetPressedKey(void)
 {
     return last_key_pressed;
+}
+
+void Engine_SetFontSize(double new_size)
+{
+    if (new_size == current_font_size)
+    return; 
+
+    if (font != NULL)
+    {
+        XftFontClose(display, font);
+    }
+
+    font = XftFontOpen(display, screen, XFT_FAMILY, XftTypeString, "sans", XFT_SIZE, XftTypeDouble, new_size, NULL);
+
+    if (font == NULL)
+    {
+        fprintf(stderr, "Failed to dynamically scale font\n");
+        exit(1);
+    }
+
+    current_font_size = new_size;
+
 }

@@ -4,27 +4,10 @@
 
 int main (void)
 {
-    int screen_width = 1920;
-    int screen_height = 1080;
+    int screen_width = Engine_GetScreenWidth();
+    int screen_height = Engine_GetScreenHeight();
 
     int target_time_per_frame = 16666;
-
-    Rectangle clock_btn;
-    Rectangle list;
-    Rectangle name_box = {240, 40, 300, 40};
-    Rectangle time_box = {560, 40, 100, 40};
-    Rectangle dur_box  = {680, 40, 100, 40};
-    Rectangle rec_box  = {800, 40, 100, 40};
-
-    list.width =screen_width - 210;
-    list.length = screen_height;
-    list.x = 210;
-    list.y = 0;
-
-    clock_btn.width = 90;
-    clock_btn.length = 90;
-    clock_btn.x = screen_width - clock_btn.width - 50;
-    clock_btn.y =  50;
 
     bool is_timer_running = false;
 
@@ -97,53 +80,102 @@ int main (void)
         
         Engine_BeginDrawing ();
 
+        int win_w = current_width;
+        int win_h = current_height;
+
+        double dynamic_font_size = (win_w + win_h) * 0.005;
+
+        if (dynamic_font_size < 5.0) 
+        dynamic_font_size = 5.0;
+
+        Engine_SetFontSize(dynamic_font_size);
+
+        float sidebar_pct = 0.11f; 
+        float top_gap_pct = 0.05f;  
+        float box_height_pct = 0.045f;
+
+        int sidebar_w = (int)(win_w * sidebar_pct);
+        int list_x = sidebar_w;
+        int list_w = win_w - sidebar_w;
+
+        int content_margin = (int)(win_w * 0.04f); 
+        int content_start_x = list_x + content_margin;
+
+        int box_gap = (int)(win_w * 0.015f);
+
+        int name_w = (int)(win_w * 0.20f); 
+        int time_w = (int)(win_w * 0.06f); 
+        int dur_w  = (int)(win_w * 0.06f); 
+        int rec_w  = (int)(win_w * 0.06f);
+
+        int top_y = (int)(win_h * top_gap_pct);
+        int box_h = (int)(win_h * box_height_pct);
+    
+        int clock_size = (int)(win_h * 0.08f);
+        int clock_x = win_w - clock_size - content_margin;
+        Rectangle clock_btn = { (float)clock_x, (float)top_y, (float)clock_size, (float)clock_size };
+
+        Rectangle name_box = { (float)content_start_x, (float)top_y, (float)name_w, (float)box_h };
+        Rectangle time_box = { name_box.x + name_w + box_gap, (float)top_y, (float)time_w, (float)box_h };
+        Rectangle dur_box  = { time_box.x + time_w + box_gap, (float)top_y, (float)dur_w,  (float)box_h };
+        Rectangle rec_box  = { dur_box.x + dur_w + box_gap,   (float)top_y, (float)rec_w,  (float)box_h };
+
+        Rectangle list = { (float)list_x, 0, (float)list_w, (float)win_h };
+   
+        int text_pad_x = (int)(win_w * 0.008f);
+        int text_baseline_offset = (int)(box_h * 0.68f); 
+
+        int list_start_y = top_y + clock_size + (int)(win_h * 0.04f);
+        int row_height = (int)(win_h * 0.028f);
+
         Engine_ClearBackground (bg);
 
-        Engine_DrawRectangle   (0, 0, 210, screen_height, sidebar);
+        Engine_DrawRectangle(0, 0, sidebar_w, win_h, sidebar);
 
         Engine_DrawRectangle(list.x, list.y, list.width, list.length , center);
 
-        Engine_DrawRectangle(name_box.x, name_box.y, name_box.width, name_box.length, focused_box == 1? clock_active : center);
-        Engine_DrawText(name_box.x + 10, name_box.y + 25, name_buffer, text);
-
+        // Name Box
+        Engine_DrawRectangle(name_box.x, name_box.y, name_box.width, name_box.length, focused_box == 1 ? clock_active : center);
+        Engine_DrawText(name_box.x + text_pad_x, name_box.y + text_baseline_offset, name_buffer, text);
         if (name_len == 0 && focused_box != 1)
         {
-            Engine_DrawText(name_box.x + 10, name_box.y + 25, "Click here to add the name of the new task...", text);
+            Engine_DrawText(name_box.x + text_pad_x, name_box.y + text_baseline_offset, "Task Name...", text);
         }
 
-        Engine_DrawRectangle(time_box.x, time_box.y, time_box.width, time_box.length, focused_box == 4? clock_active : center);
-        Engine_DrawText(time_box.x + 10, time_box.y + 25, time_buffer, text);
-
-        if (time_len == 0 && focused_box != 4) {
-            Engine_DrawText(time_box.x + 10, time_box.y + 25, "HH:MM", text);
+        // Time Box
+        Engine_DrawRectangle(time_box.x, time_box.y, time_box.width, time_box.length, focused_box == 4 ? clock_active : center);
+        Engine_DrawText(time_box.x + text_pad_x, time_box.y + text_baseline_offset, time_buffer, text);
+        if (time_len == 0 && focused_box != 4)
+        {
+            Engine_DrawText(time_box.x + text_pad_x, time_box.y + text_baseline_offset, "HH:MM", text);
         }
 
-        Engine_DrawRectangle(dur_box.x, dur_box.y, dur_box.width, dur_box.length, focused_box == 2? clock_active : center);
-        Engine_DrawText(dur_box.x + 10, dur_box.y + 25, dur_buffer, text);
-
+        // Duration Box
+        Engine_DrawRectangle(dur_box.x, dur_box.y, dur_box.width, dur_box.length, focused_box == 2 ? clock_active : center);
+        Engine_DrawText(dur_box.x + text_pad_x, dur_box.y + text_baseline_offset, dur_buffer, text);
         if (dur_len == 0 && focused_box != 2)
         {
-            Engine_DrawText(dur_box.x + 10, dur_box.y + 25, "Mins", text);
+            Engine_DrawText(dur_box.x + text_pad_x, dur_box.y + text_baseline_offset, "Mins", text);
         }
 
-        Engine_DrawRectangle (rec_box.x, rec_box.y, rec_box.width, rec_box.length,focused_box == 3? clock_active : center);
-        Engine_DrawText(rec_box.x + 10, rec_box.y + 25, rec_buffer, text);
-
-        if (dur_len == 0 && focused_box != 2)
+        // Recurrence Box
+        Engine_DrawRectangle(rec_box.x, rec_box.y, rec_box.width, rec_box.length, focused_box == 3 ? clock_active : center);
+        Engine_DrawText(rec_box.x + text_pad_x, rec_box.y + text_baseline_offset, rec_buffer, text);
+        if (rec_len == 0 && focused_box != 3) 
         {
-            Engine_DrawText(rec_box.x + 10, rec_box.y + 25, "D/W/O", text);
+            Engine_DrawText(rec_box.x + text_pad_x, rec_box.y + text_baseline_offset, "D/W/O", text);
         }       
 
-        int box_size = 12;
-        int padding = 4;
+        int box_size = (int)(win_h * 0.012f);
+        int grid_padding = (int)(win_h * 0.004f);
         int total_cols = 52;
         int total_rows = 7;
 
-        int grid_width = total_cols * (box_size + padding);
-        int grid_height = total_rows * (box_size + padding);
+        int grid_width = total_cols * (box_size + grid_padding);
+        int grid_height = total_rows * (box_size + grid_padding);
 
-        int start_x = 210 + ((screen_width - 210) / 2) - (grid_width / 2);
-        int start_y = screen_height - grid_height - 60;
+        int start_x = content_start_x;
+        int start_y = win_h - grid_height - (int)(win_h * 0.067f);
 
         bool render_tooltip = false;
         char tooltip_text[64] = {0};
@@ -154,8 +186,8 @@ int main (void)
         {
             for (int row = 0; row < total_rows; row++)
             {
-                int x = start_x + col * (box_size + padding);
-                int y = start_y + row * (box_size + padding);
+                int x = start_x + col * (box_size + grid_padding);
+                int y = start_y + row * (box_size + grid_padding);
                 
                 int day_index = (col * total_rows) + row;
                 int score = heatmap_scores[day_index];
@@ -189,19 +221,24 @@ int main (void)
 
         if (render_tooltip)
         {
-           int tip_width = 180;
-            int tip_height = 26;
+            int tip_width = (int)(win_w * 0.09f);
+            int tip_height = (int)(win_h * 0.025f);
             int tip_x = tooltip_pos.x - (tip_width / 2);
             int tip_y = tooltip_pos.y - tip_height - 8;
 
             Engine_DrawRectangle(tip_x, tip_y, tip_width, tip_height, text);
-            Engine_DrawText(tip_x + 8, tip_y + 18, tooltip_text, bg);
+            Engine_DrawText(tip_x + (int)(tip_width * 0.05f), tip_y + (int)(tip_height * 0.7f), tooltip_text, bg);
         }
 
         for (int v = 0; v < view.count; ++v)
         {
             int actual_index = view.indices[v];
-            int text_y = 100 + (v * 30); 
+            int text_y = list_start_y + (v * row_height); 
+
+            if (text_y > (win_h * 0.75f)) 
+            {
+                break; 
+            }
 
             char duration_text[32];
             snprintf(duration_text, sizeof(duration_text), "%d mins", today_list->items[actual_index]->target_duration);  
@@ -217,9 +254,9 @@ int main (void)
             else if(actual_index == active_task)
             current_color = clock;
 
-            Engine_DrawText (name_box.x, text_y, today_list->items[actual_index]->name, current_color);
-            Engine_DrawText (time_box.x, text_y, sched_time_text, current_color); 
-            Engine_DrawText (dur_box.x,  text_y, duration_text, current_color);
+            Engine_DrawText (name_box.x + text_pad_x, text_y, today_list->items[actual_index]->name, current_color);
+            Engine_DrawText (time_box.x + text_pad_x, text_y, sched_time_text, current_color); 
+            Engine_DrawText (dur_box.x + text_pad_x,  text_y, duration_text, current_color);
         }       
         
         int current_display_seconds = remaining_seconds;
@@ -254,7 +291,7 @@ int main (void)
             int secs = current_display_seconds % 60;
             char timer_text[16];
             snprintf(timer_text, sizeof(timer_text), "%02d:%02d", mins, secs);
-            Engine_DrawText(clock_btn.x + 23, clock_btn.y + 45, timer_text, text);
+            Engine_DrawText(clock_btn.x + (int)(clock_btn.width * 0.22f), clock_btn.y + (int)(clock_btn.length * 0.57f), timer_text, text);
         }
            
         else
@@ -266,7 +303,7 @@ int main (void)
                 int secs = remaining_seconds % 60;
                 char timer_text[16];
                 snprintf(timer_text, sizeof(timer_text), "%02d:%02d", mins, secs);
-                Engine_DrawText(clock_btn.x + 23, clock_btn.y + 45, timer_text, text);
+                Engine_DrawText(clock_btn.x + (int)(clock_btn.width * 0.22f), clock_btn.y + (int)(clock_btn.length * 0.57f), timer_text, text);
            }
         }
 
@@ -287,7 +324,10 @@ int main (void)
                     }
                     else
                     {
-                        if (remaining_seconds <= 0) remaining_seconds = total_seconds;
+                        if (remaining_seconds <= 0) 
+                        {
+                            remaining_seconds = total_seconds;
+                        }
                         timer_segment_start = time(NULL);
                         is_timer_running = true;
                     }
@@ -317,7 +357,7 @@ int main (void)
             
             else if (CheckCollisionPointRec (mouse_pos, list))
             {
-                int clicked_row = (mouse_pos.y - 100) / 30;
+                int clicked_row = ((int)mouse_pos.y - list_start_y) / row_height;
 
                 if (clicked_row >= 0 && clicked_row < view.count)
                 {

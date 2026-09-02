@@ -13,6 +13,10 @@
 
 void Engine_InitWindow(int width, int height, const char* title);
 
+int Engine_GetScreenWidth(void);
+
+int Engine_GetScreenHeight(void);
+
 void Engine_CloseWindow(void);
 
 bool Engine_WindowShouldClose(void);
@@ -34,5 +38,11 @@ bool Engine_IsMouseButtonPressed(void);
 void Engine_DrawText(int x, int y, const char* text, RGBA_Colour color);
 
 int Engine_GetPressedKey(void);
+
+void Engine_SetFontSize(double new_size);
+
+extern int current_width;
+
+extern int current_height;
 
 #endif
