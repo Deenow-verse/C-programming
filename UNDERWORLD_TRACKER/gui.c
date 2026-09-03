@@ -251,7 +251,17 @@ int main (void)
         {
             int actual_index = view.indices[v];
 
-            int text_y = list_start_y + (v * row_height) - camera_y; 
+            int row_top_y = list_start_y + (v * row_height) - camera_y;
+
+            if (row_top_y + row_height < list_start_y)
+            {
+                continue; 
+            }
+
+            if (row_top_y > (win_h * 0.75f)) 
+            break;
+
+            int text_y = row_top_y + (int)(row_height * 0.75f); 
 
             if (text_y < list_start_y) 
             {
@@ -377,16 +387,24 @@ int main (void)
             
             else if (CheckCollisionPointRec (mouse_pos, list))
             {
-                int clicked_row = ((int)mouse_pos.y - list_start_y + camera_y) / row_height;
-
-                if (clicked_row >= 0 && clicked_row < view.count)
+                if (mouse_pos.y < list_start_y)
                 {
-                    int actual_index = view.indices[clicked_row];
-                    task_duration = today_list->items[actual_index]->target_duration;
-                    active_task = actual_index;
-                    total_seconds = task_duration * 60;
-                    remaining_seconds = total_seconds;
-                    is_timer_running = false;
+                    focused_box = 0;
+                }
+                
+                else
+                {
+                    int clicked_row = ((int)mouse_pos.y - list_start_y + camera_y) / row_height;
+
+                    if (clicked_row >= 0 && clicked_row < view.count)
+                    {
+                        int actual_index = view.indices[clicked_row];
+                        task_duration = today_list->items[actual_index]->target_duration;
+                        active_task = actual_index;
+                        total_seconds = task_duration * 60;
+                        remaining_seconds = total_seconds;
+                        is_timer_running = false;
+                    }
                 }
             }
 
