@@ -27,6 +27,9 @@ int main (void)
     int remaining_seconds = total_seconds;
     int active_task = -1;
     bool is_edit_mode = false;
+
+    int camera_y = 0;
+    int scroll_speed = 40;
     
     RGBA_Colour bg = {255, 255, 255, 255};
     RGBA_Colour center = {198, 228, 255, 255};
@@ -230,10 +233,30 @@ int main (void)
             Engine_DrawText(tip_x + (int)(tip_width * 0.05f), tip_y + (int)(tip_height * 0.7f), tooltip_text, bg);
         }
 
+        int visible_list_height = (int)(win_h * 0.75f) - list_start_y;
+        int max_camera_y = (view.count * row_height) - visible_list_height;
+
+        if (max_camera_y < 0) 
+        max_camera_y = 0;
+
+        if (camera_y > max_camera_y) 
+        camera_y = max_camera_y;
+
+        if (camera_y < 0) 
+        {
+            camera_y = 0;
+        }
+
         for (int v = 0; v < view.count; ++v)
         {
             int actual_index = view.indices[v];
-            int text_y = list_start_y + (v * row_height); 
+
+            int text_y = list_start_y + (v * row_height) - camera_y; 
+
+            if (text_y < list_start_y) 
+            {
+                continue; 
+            }
 
             if (text_y > (win_h * 0.75f)) 
             {
@@ -248,16 +271,13 @@ int main (void)
             strftime(sched_time_text, sizeof(sched_time_text), "%H:%M", sched_info);
 
             RGBA_Colour current_color = text;
-
-            if (today_list->items[actual_index]->completion_status == true)
-            current_color = clock_active;
-            else if(actual_index == active_task)
-            current_color = clock;
+            if (today_list->items[actual_index]->completion_status == true) current_color = clock_active;
+            else if (actual_index == active_task) current_color = clock;
 
             Engine_DrawText (name_box.x + text_pad_x, text_y, today_list->items[actual_index]->name, current_color);
             Engine_DrawText (time_box.x + text_pad_x, text_y, sched_time_text, current_color); 
             Engine_DrawText (dur_box.x + text_pad_x,  text_y, duration_text, current_color);
-        }       
+        }      
         
         int current_display_seconds = remaining_seconds;
 
@@ -357,7 +377,7 @@ int main (void)
             
             else if (CheckCollisionPointRec (mouse_pos, list))
             {
-                int clicked_row = ((int)mouse_pos.y - list_start_y) / row_height;
+                int clicked_row = ((int)mouse_pos.y - list_start_y + camera_y) / row_height;
 
                 if (clicked_row >= 0 && clicked_row < view.count)
                 {
@@ -381,6 +401,16 @@ int main (void)
 
         if (key != 0)
         {
+            if (key == 65362 || key == 65365)
+            {
+                camera_y -= scroll_speed;
+                if (camera_y < 0) camera_y = 0;
+            }
+            else if (key == 65364 || key == 65366)
+            {
+                camera_y += scroll_speed;
+            }
+            
             if (key == 27)
             {
                 if (focused_box != 0)

@@ -129,6 +129,11 @@ void Engine_BeginDrawing(void)
                 last_key_pressed = key_buffer[0];
             }
 
+            else
+            {
+                last_key_pressed = (int)keysym;
+            }
+
             if (keysym == XK_BackSpace)
             {
                 last_key_pressed = 8;
