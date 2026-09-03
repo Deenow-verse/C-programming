@@ -310,6 +310,13 @@ int main (void)
                     update_view_cache(today_list, &view, current_wday);
                     
                     heatmap_scores[363] = get_completed_tasks_count(db_file, today_midnight);
+
+                    char notify_cmd[512];
+
+                    snprintf(notify_cmd, sizeof(notify_cmd), "notify-send -u critical -i clock \"Underworld Tracker\" \"Time is up! Task completed: %s\"", today_list->items[active_task]->name);
+
+                    int sys_ret = system(notify_cmd);
+                    (void)sys_ret;
                 }
             }
         }
