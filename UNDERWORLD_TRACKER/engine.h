@@ -1,10 +1,14 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
 #include "my_math.h"
 #include <X11/Xft/Xft.h>
 #include <X11/Xutil.h>
@@ -40,6 +44,8 @@ void Engine_DrawText(int x, int y, const char* text, RGBA_Colour color);
 int Engine_GetPressedKey(void);
 
 void Engine_SetFontSize(double new_size);
+
+double Engine_GetTime(void);
 
 extern int current_width;
 

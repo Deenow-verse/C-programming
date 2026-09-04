@@ -7,3 +7,8 @@ bool CheckCollisionPointRec(Vector2D point, Rectangle rec)
 
     return false;
 }
+
+float Lerp (float start, float end, float t)
+{
+    return start + (end - start) * t;
+}

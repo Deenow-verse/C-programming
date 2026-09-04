@@ -25,5 +25,6 @@ typedef struct
 } Rectangle;
 
 bool CheckCollisionPointRec(Vector2D point, Rectangle rec);
+float Lerp (float start, float end, float t);
 
 #endif

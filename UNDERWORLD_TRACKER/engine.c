@@ -268,3 +268,10 @@ void Engine_SetFontSize(double new_size)
     current_font_size = new_size;
 
 }
+ 
+double Engine_GetTime(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + ts.tv_nsec / 1e9;
+}
